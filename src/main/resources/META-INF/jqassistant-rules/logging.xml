@@ -1,0 +1,102 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:logging:Verbindlich">
+        <includeConstraint refId="isyfact:logging:IsyLoggerMussVerwendetWerden"/>
+        <includeConstraint refId="isyfact:logging:IsyLoggerMussStatischInitialisiertWerden"/>
+        <includeConstraint refId="isyfact:logging:IsyLoggerMustBeDeclaredAsConstant"/>
+    </group>
+
+    <concept id="isyfact:logging:IsyLogger">
+        <description>
+            Markiert den Logger vom Typ "de.bund.bva.isyfact.logging.IsyLogger" mit "IsyLogger".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (isyLogger:Type)
+            WHERE
+              isyLogger.fqn = "de.bund.bva.isyfact.logging.IsyLogger"
+            SET
+              isyLogger:IsyLogger
+            RETURN
+              isyLogger AS IsyLogger
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:logging:Logger">
+        <description>
+            Markiert alle bekannten Logger-Implementierungen (JUL, Commons Logging, Log4j, SLF4j) mit "Logger".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (logger:Type)
+            WHERE
+              logger.fqn IN [
+                "java.util.logging.Logger",
+                "org.apache.commons.logging.Log",
+                "org.apache.log4j.Logger",
+                "org.slf4j.Logger"
+              ]
+            SET
+              logger:Logger
+            RETURN
+              logger AS Logger
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:logging:IsyLoggerMussVerwendetWerden">
+        <requiresConcept refId="isyfact:logging:IsyLogger"/>
+        <requiresConcept refId="isyfact:logging:Logger"/>
+        <description>
+            Für das Logging darf ausschliesslich "IsyLogger" verwendet werden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (type:Type)-[:DECLARES]->(method:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(logger:Logger)
+            WHERE NOT
+              logger:IsyLogger
+            RETURN
+              type AS Type, method AS Method, invokes.lineNumber AS LineNumber, logger AS InvalidLogger            
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:logging:IsyLoggerMussStatischInitialisiertWerden">
+        <description>
+            Keine Methode mit Ausnahme des statischen Initialisierers darf die "IsyLoggerFactory"
+            direkt verwenden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (isyLoggerFactory:Type)-[:DECLARES]->(getLogger:Method)
+            WHERE
+              isyLoggerFactory.fqn = "de.bund.bva.isyfact.logging.IsyLoggerFactory"
+              AND getLogger.signature="de.bund.bva.isyfact.logging.IsyLogger getLogger(java.lang.Class)"
+            WITH
+              getLogger
+            MATCH
+              (type:Type)-[:DECLARES]->(method:Method)-[:INVOKES]->(getLogger)
+            WHERE
+              method.signature <> "void <clinit>()"
+            RETURN
+              type AS Type, method AS MethodInvokingIsyLoggerFactory
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:logging:IsyLoggerMustBeDeclaredAsConstant">
+        <requiresConcept refId="isyfact:logging:Logger"/>
+        <description>
+            Alle Felder, die einen Logger repräsentieren, müssen als "private static final" deklariert sein.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (type:Type)-[:DECLARES]->(field:Field)-[:OF_TYPE]->(logger:Logger)
+            WHERE NOT (
+              field.visibility = "private" AND
+              HAS(field.static) AND
+              HAS(field.final)
+            )
+            RETURN
+              type AS Type, field AS InvalidDeclaration            
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

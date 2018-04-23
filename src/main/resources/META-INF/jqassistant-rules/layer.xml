@@ -1,0 +1,133 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:layer:Verbindlich">
+        <includeConstraint refId="isyfact:layer:ZugriffAufCoreLayerUeberInterface"/>
+        <includeConstraint refId="isyfact:layer:UndefinedDependencies"/>
+        <includeConstraint refId="isyfact:layer:UnusedDependencies"/>
+    </group>
+
+    <concept id="isyfact:layer:DefinedLayer">
+        <requiresConcept refId="isyfact:package:Root"/>
+        <description>
+            Das Wurzel-Package enthält Packages, welche die Layer der Anwendung repräsentieren. Sie werden
+            mit "Layer" gekennzeichnet.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Root:Package)-[:CONTAINS]->(layer:Package)
+            SET
+              layer:Layer
+            RETURN
+              layer.name AS LayerName, layer AS LayerPackage
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependencies">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (gui:Layer {name:"gui"}),
+              (core:Layer {name:"core"}),
+              (persistence:Layer {name:"persistence"}),
+              (service:Layer {name:"service"}),
+              (batch:Layer {name:"batch"}),
+              (common:Layer {name:"common"})
+            CREATE UNIQUE
+              (gui)-[g1:DEFINES_DEPENDENCY]->(core),
+              (gui)-[g2:DEFINES_DEPENDENCY]->(common),
+              (service)-[s1:DEFINES_DEPENDENCY]->(core),
+              (core)-[c1:DEFINES_DEPENDENCY]->(persistence),
+              (core)-[c2:DEFINES_DEPENDENCY]->(common),
+              (batch)-[b1:DEFINES_DEPENDENCY]->(core),
+              (batch)-[b2:DEFINES_DEPENDENCY]->(common)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:Dependencies">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwei Layer besitzen eine Abhängigkeit, wenn sie Java-Typen in beliebigen Sub-Packages besitzen,
+            die voneinander abhängig sind. Hierfür werden zwischen den Layern "DEPENDS_ON"-Beziehungen
+            erzeugt.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (layer1:Layer)-[:CONTAINS*]->(type1:Type),
+              (layer2:Layer)-[:CONTAINS*]->(type2:Type),
+              (type1)-[d:DEPENDS_ON]->(type2)
+            WHERE
+              layer1 <> layer2
+            WITH
+              layer1, layer2, count(d) AS weight
+            MERGE
+              (layer1)-[d:DEPENDS_ON]->(layer2)
+            SET
+              d.weight = weight
+            RETURN
+              layer1 AS Layer1, d AS Dependency, layer2 AS Layer2
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:layer:ZugriffAufCoreLayerUeberInterface">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Wird eine Funktionalität des Core-Layers aus einem anderen Layer heraus verwendet, dann muss dies
+            über ein Interface geschehen.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (layer:Layer)-[:CONTAINS*]->(type:Type),
+              (core:Layer{name:"core"})-[:CONTAINS*]->(coreType:Type),
+              (type)-[:DEPENDS_ON]->(coreType)
+            WHERE
+              layer <> core
+              AND NOT coreType:Interface
+            RETURN
+              layer.name AS Layer, type.fqn AS Dependent, coreType.fqn AS CoreDependency
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:layer:UndefinedDependencies">
+        <requiresConcept refId="isyfact:layer:DefinedDependencies"/>
+        <requiresConcept refId="isyfact:layer:Dependencies"/>
+        <description>
+            Es dürfen keine undefinierten Abhängigkeiten zwischen Layern existieren.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (layer1:Layer)-[:DEPENDS_ON]->(layer2:Layer)
+            WHERE NOT
+              (layer1)-[:DEFINES_DEPENDENCY]->(layer2)
+            WITH
+              layer1, layer2
+            MATCH
+              (layer1)-[:CONTAINS*]->(type1:Type),
+              (layer2)-[:CONTAINS*]->(type2:Type),
+              (type1)-[:DEPENDS_ON]->(type2)
+            RETURN
+              layer1.name AS Layer, type1 AS Type, layer2.name AS LayerDependency, type2 AS TypeDependency
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:layer:UnusedDependencies">
+        <requiresConcept refId="isyfact:layer:DefinedDependencies"/>
+        <requiresConcept refId="isyfact:layer:Dependencies"/>
+        <description>
+            Definierte, aber unbenutzte Abhängigkeiten zwischen Layern sollten aus der Architekturdefinition entfernt werden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (layer1:Layer)-[:DEFINES_DEPENDENCY]->(layer2:Layer)
+            WHERE NOT
+              (layer1)-[:DEPENDS_ON]->(layer2)
+            RETURN
+              layer1.name AS Layer1, layer2.name AS Layer2
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

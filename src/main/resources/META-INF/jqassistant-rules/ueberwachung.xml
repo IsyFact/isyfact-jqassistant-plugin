@@ -1,0 +1,80 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:ueberwachung:Empfohlen">
+        <includeConstraint refId="isyfact:ueberwachung:MBeanSuffix"/>
+        <includeConstraint refId="isyfact:ueberwachung:MBeanMitZugriffAufAWK"/>
+        <includeConstraint refId="isyfact:ueberwachung:MBeanPackageStruktur"/>
+    </group>
+
+    <concept id="isyfact:ueberwachung:MBean">
+        <description>
+            Markiert ManagedBeans  mit "mbean:ueberwachung:MBean".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (mbean:Type)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(managedResource:Type)
+            WHERE
+              managedResource.fqn = "org.springframework.jmx.export.annotation.ManagedResource"
+            SET
+              mbean:ueberwachung:MBean
+            RETURN
+              mbean AS Mbean
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:ueberwachung:MBeanSuffix">
+        <requiresConcept refId="isyfact:ueberwachung:MBean"/>
+        <description>
+            Der Java-Klassenname der eigentlichen MBean wird mit dem Suffix „MBean“ versehen.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (mb:MBean)
+            WHERE
+              NOT mb.name ENDS WITH "MBean"
+            RETURN
+              mb AS MBeanOhneMBeanSuffix
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:ueberwachung:MBeanMitZugriffAufAWK">
+        <requiresConcept refId="isyfact:ueberwachung:MBean"/>
+        <requiresConcept refId="isyfact:core:CoreType"/>
+        <description>
+            Der Anwendungskern (AWK) und die MBean werden von einer Spring-Factory erzeugt. Der Anwendungskern
+            ruft Methoden der MBean auf (Push-Konzept). Das Auslesen der Informationen durch die MBean aus dem
+            Anwendungskern (Pull-Konzept) ist zu vermeiden, da Performance-Probleme entstehen können.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (mb:MBean)
+            WHERE
+              (mb)-[:DEPENDS_ON]->(:CoreType)
+            RETURN
+              mb AS MBeanMitZugriffAufAWK
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:ueberwachung:MBeanPackageStruktur">
+        <requiresConcept refId="isyfact:ueberwachung:MBean"/>
+        <description>
+            MBeans, welche Informationen über die gesamte Anwendung bereitstellen oder identisch für mehrere
+            Komponenten implementiert sind, werden in folgendem Package abgelegt:
+            "(organisation).(domäne).(anwendungssystem).common.jmx".
+            MBeans, welche die Administration einzelner Anwendungskomponenten betreffen bzw. spezifisch
+            hierfür implementiert wurden, werden im Layer "core" in einem eigenen Package unterhalb der
+            Anwendungskomponente abgelegt:
+            "(organisation).(domäne).(anwendungssystem/register).core.(komponente).jmx".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (mb:MBean)
+            WHERE
+              NOT ((:Layer {name: "common"})-[:CONTAINS]->(:Package {name: "jmx"})-[:CONTAINS]->(mb) OR
+                   (:Layer {name: "core"})-[:CONTAINS]->(:Package)-[:CONTAINS]->(:Package {name: "jmx"})-[:CONTAINS]->(mb))
+            RETURN
+              mb AS MBeanImFalschenPackage
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

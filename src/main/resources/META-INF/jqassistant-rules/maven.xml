@@ -1,0 +1,23 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <concept id="isyfact:maven:MainArtifact">
+        <description>
+            Alle durch Maven erzeugten Artefakte, die nicht Tests oder reine POMs repräsentieren, werden mit
+            "Main" gekennzeichnet.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Maven:Project)-[:CREATES]->(mainArtifact:Artifact)
+            WHERE NOT
+              mainArtifact.type IN [
+                "test-jar",
+                "pom"
+              ]
+            SET
+              mainArtifact:Main
+            RETURN
+              mainArtifact AS MainArtifact
+        ]]></cypher>
+    </concept>
+
+</jqa:jqassistant-rules>

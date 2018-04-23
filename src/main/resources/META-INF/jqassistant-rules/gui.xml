@@ -1,0 +1,131 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:gui:Empfohlen">
+        <includeConstraint refId="isyfact:gui:ModelBeanSerializable"/>
+        <includeConstraint refId="isyfact:gui:ModelBeanVerwendetAwkTypen"/>
+        <includeConstraint refId="isyfact:gui:ModelBeanNameEnthaeltKomponente"/>
+        <includeConstraint refId="isyfact:gui:ControllerBeanNameEnthaeltKomponente"/>
+        <includeConstraint refId="isyfact:gui:ControllerBeanErbtVonAbstractGuiController"/>
+    </group>
+
+    <concept id="isyfact:gui:ModelBean">
+        <description>
+            Markiert Klassen im Layer "gui", deren Name auf "Model" endet, mit "Gui:ModelBean".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "gui"})-[:CONTAINS*]->(modelBean:Type)
+            WHERE
+              modelBean.name ENDS WITH "Model"
+            SET
+              modelBean:Gui:ModelBean
+            RETURN
+              modelBean AS ModelBean
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:gui:ControllerBean">
+        <description>
+            Markiert Klassen im Layer "gui", deren Name auf "Controller" endet, mit "Gui:ControllerBean".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "gui"})-[:CONTAINS*]->(controllerBean:Type)
+            WHERE
+              controllerBean.name ENDS WITH "Controller"
+            SET
+              controllerBean:Gui:ControllerBean
+            RETURN
+              controllerBean AS ControllerBean
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:gui:ModelBeanSerializable">
+        <requiresConcept refId="isyfact:gui:ModelBean"/>
+        <description>
+            Da das Model Bean durch den Flow erzeugt wird und Flow Scope besitzt, wird es automatisch mit in
+            die Session-Persistierung einbezogen. Dazu muss das Model das Interface "Serializable"
+            implementieren.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (modelBean:ModelBean)
+            WHERE
+              NOT (modelBean)-[:IMPLEMENTS]->(:Type {fqn: "java.io.Serializable"})
+            RETURN
+              modelBean AS ModelBeanImplementiertNichtSerializable
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:gui:ModelBeanVerwendetAwkTypen">
+        <requiresConcept refId="isyfact:gui:ModelBean"/>
+        <requiresConcept refId="isyfact:core:CoreType"/>
+        <description>
+            In den Models der GUI-Komponenten werden eigene Datentypen und nicht die des Anwendungskerns verwendet.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (modelBean:ModelBean)-[:DECLARES]->(m:Member),
+              (coreType:CoreType)
+            WHERE
+              m.signature CONTAINS coreType.fqn
+            RETURN
+              modelBean AS ModelBeanMitAwkTyp, m AS MethodeMitAwkTyp
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:gui:ModelBeanNameEnthaeltKomponente">
+        <requiresConcept refId="isyfact:gui:ModelBean"/>
+        <description>
+            Model Bean-Klassen tragen den Namen der GUI-Komponente und enden auf Model (z.B. ErstellenModel).
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (model:ModelBean),
+              (p:Package)-[:CONTAINS]->(model)
+            WITH
+              toLower(model.name) AS modelName, p.name AS packageName
+            WHERE
+              NOT modelName CONTAINS "abstract"
+              AND packageName + "model" <> modelName
+            RETURN
+              modelName AS ModelBeanName, packageName AS PackageName
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:gui:ControllerBeanNameEnthaeltKomponente">
+        <requiresConcept refId="isyfact:gui:ControllerBean"/>
+        <description>
+            Controller Bean-Klassen tragen den Namen der GUI-Komponente und enden auf Controller
+            (z.B. ErstellenController).
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (controller:ControllerBean),
+              (p:Package)-[:CONTAINS]->(controller)
+            WITH
+              toLower(controller.name) AS controllerName, p.name AS packageName
+            WHERE
+              NOT controllerName CONTAINS "abstract"
+              AND packageName + "controller" <> controllerName
+            RETURN
+              controllerName AS ControllerBeanName, packageName AS PackageName
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:gui:ControllerBeanErbtVonAbstractGuiController">
+        <requiresConcept refId="isyfact:gui:ControllerBean"/>
+        <description>
+            Das Controller-Bean muss von "AbstractGuiController" erben.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (controllerBean:ControllerBean)
+            WHERE
+              NOT (controllerBean)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.isyfact.common.web.global.AbstractGuiController"})
+            RETURN
+              controllerBean AS ControllerErbtNichtVonAbstractGuiController
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

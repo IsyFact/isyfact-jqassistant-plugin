@@ -1,0 +1,172 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:persistence:Empfohlen">
+        <includeConstraint refId="isyfact:persistence:EntitiesLiegenInPackageEntity"/>
+        <includeConstraint refId="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys"/>
+        <includeConstraint refId="isyfact:persistence:DaoInterfacesVonDaoAbgeleitet"/>
+        <includeConstraint refId="isyfact:persistence:DaoKlasseVonAbstractDaoAbgeleitet"/>
+        <includeConstraint refId="isyfact:persistence:KeineNamedQueriesUeberAnnotationen"/>
+        <includeConstraint refId="isyfact:persistence:KeineBulkQueries"/>
+        <includeConstraint refId="isyfact:persistence:GenerationTypeAuto"/>
+    </group>
+
+    <concept id="isyfact:persistence:DaoInterface">
+        <description>
+            Markiert Interfaces im Package "(ROOT).persistence.(komponente).dao" mit "DaoInterface".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(i:Interface)
+            SET
+              i:Persistence:DaoInterface
+            RETURN
+              i AS DaoInterface
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:persistence:DaoImpl">
+        <description>
+            Markiert Klassen im Package "(ROOT).persistence.(komponente).dao.impl" mit "DaoImpl".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(c:Class)
+            SET
+              c:Persistence:DaoImpl
+            RETURN
+              c AS DaoImpl
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:persistence:PersistenceType">
+        <description>
+            Markiert alle Typen im Layer "persistence" mit "PersistenceType".
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "persistence"})-[:CONTAINS*]->(persistenceType:Type)
+            SET
+              persistenceType:Persistence:PersistenceType
+            RETURN
+              persistenceType AS PersistenceType
+        ]]></cypher>
+    </concept>
+
+
+    <constraint id="isyfact:persistence:EntitiesLiegenInPackageEntity">
+        <requiresConcept refId="jpa2:Entity"/>
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+
+        <description>
+            Entitäten werden in "(organisation).(domäne).(system).persistence.(komponente).entity"
+            implementiert.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (e:Jpa:Entity)
+            WHERE
+             NOT (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "entity"})-[:CONTAINS]->(e)
+            RETURN
+              e AS EntityImFalschenPackage
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys">
+        <requiresConcept refId="jpa2:Entity"/>
+        <description>
+            Der Primärschlüssel einer Entität besteht aus genau einem Attribut. Zusammengesetzte Schlüssel
+            dürfen nicht verwendet werden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (e:Jpa:Entity)
+            WHERE
+              (e)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.IdClass"}) OR
+              (e)-[:DECLARES]->(:Field)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.EmbeddedId"})
+            RETURN
+              e AS EntityMitCompositeKey
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:DaoInterfacesVonDaoAbgeleitet">
+        <requiresConcept refId="isyfact:persistence:DaoInterface"/>
+        <description>
+            Für ein konkretes DAO ist eine eigene Schnittstelle von der Basisschnittstelle Dao abzuleiten.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (daoif:DaoInterface)
+            WHERE
+              NOT (daoif)-[:IMPLEMENTS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.Dao"})
+            RETURN
+              daoif AS DaoInterfaceNichtVonDaoAbgeleitet
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:DaoKlasseVonAbstractDaoAbgeleitet">
+        <requiresConcept refId="isyfact:persistence:DaoImpl"/>
+        <description>
+            Die Implementierungsklasse des konkreten DAOs ist von AbstractDao abzuleiten.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (di:DaoImpl)
+            WHERE
+              NOT (di)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.AbstractDao"})
+            RETURN
+              di AS DaoImplNichtVonAbstractDaoAbgeleitet
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:KeineNamedQueriesUeberAnnotationen">
+        <description>
+            Die Konfiguration von Queries über Annotationen in Entitätsklassen ist verboten.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:PersistenceType)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(namedQuery:Type)
+            WHERE
+              namedQuery.fqn IN ["javax.persistence.NamedQueries",
+                                 "javax.persistence.NamedQuery"]
+            RETURN
+              t AS EntitaetMitNamedQuery
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:KeineBulkQueries">
+        <description>
+            JPA bietet über die Methode "query.executeUpdate()" die Möglichkeit, in JPQL formulierte
+            DELETE- und UPDATE-Statements, sog. Bulk-Queries, auszuführen. Die Nutzung solcher Bulk-Queries
+            ist verboten.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(m:Method)-[i:INVOKES]->(executeUpdate:Method),
+              (query:Type)-[:DECLARES]->(executeUpdate:Method)
+            WHERE
+              query.fqn = "javax.persistence.Query" AND
+              executeUpdate.signature = "int executeUpdate()"
+            RETURN
+              t.name AS Klasse, m.name AS Methode, i.lineNumber AS Zeile
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:persistence:GenerationTypeAuto">
+        <description>
+            Der GenerationType der "@GeneratedValue" Annotation muss in jedem Fall "AUTO" sein.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(m:Member)-[:ANNOTATED_BY]->(generatedValue),
+              (generatedValue)-[:OF_TYPE]->(generatedValueType:Type),
+              (generatedValue)-[:HAS]->(strategyAttribute:Enum),
+              (strategyAttribute)-[:IS]->(generationType:Member)
+            WHERE
+              generatedValueType.fqn = "javax.persistence.GeneratedValue" AND
+              strategyAttribute.name = "strategy" AND NOT
+              generationType.signature = "javax.persistence.GenerationType AUTO"
+            RETURN
+              t.name AS Klasse ,m.name AS Member, generationType
+        ]]></cypher>
+    </constraint>
+</jqa:jqassistant-rules>

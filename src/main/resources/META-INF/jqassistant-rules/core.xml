@@ -1,0 +1,67 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:core:Verbindlich">
+        <includeConstraint refId="isyfact:core:BeanNichtPerNameAuslesen"/>
+    </group>
+
+    <group id="isyfact:core:Empfohlen">
+        <includeConstraint refId="isyfact:core:BusinessObjektMitBoSuffix"/>
+    </group>
+
+    <concept id="isyfact:core:CoreType">
+        <description>Markiert Klassen im Layer "core" mit "Core:CoreType".</description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "core"})-[:CONTAINS*]->(coreType:Type)
+            SET
+              coreType:Core:CoreType
+            RETURN
+              coreType AS CoreType
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:core:BusinessObjekt">
+        <requiresConcept refId="isyfact:core:CoreType"/>
+        <description>Markiert Klassen innerhalb des Packages ".core.().ausgabedaten" mit "BusinessObjekt".</description>
+        <cypher><![CDATA[
+            MATCH
+              (p:Package)-[:CONTAINS]->(ct:CoreType)
+            WHERE
+              p.fqn ENDS WITH ".ausgabedaten"
+            RETURN
+              ct AS BusinessObjekt
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:core:BeanNichtPerNameAuslesen">
+        <description>
+            Über den Anwendungskontext könnten Beans explizit per Namen ausgelesen werden. Dies ist
+            mit einer Ausnahme verboten. Die Namen von Beans sollen nicht im Anwendungscode verwendet werden.
+            Die Ausnahme gilt für den Zugriff von einem Anwendungskontext auf einen anderen (in Zusammenhang
+            mit dem DispatcherServlet).</description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(m:Method)-[i:INVOKES]->(getBean:Method),
+              (applicationContext:Type)-[:DECLARES]->(getBean)
+            WHERE
+              applicationContext.fqn = "org.springframework.context.ApplicationContext"
+              AND getBean.signature STARTS WITH "java.lang.Object getBean(java.lang.String"
+            RETURN
+              t AS Klasse, m AS Methode, i.lineNumber AS Zeilennummer
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:core:BusinessObjektMitBoSuffix">
+        <requiresConcept refId="isyfact:core:BusinessObjekt"/>
+        <description>Unter Business-Objekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im Anwendungskern verwendet werden. Schema "(Entitaetsname)Bo"</description>
+        <cypher><![CDATA[
+            MATCH
+              (bo:BusinessObjekt)
+            WHERE
+              NOT bo.name ENDS WITH "Bo"
+            RETURN
+              bo AS BusinessObjektOhneBoSuffix
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

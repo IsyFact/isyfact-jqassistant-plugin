@@ -1,0 +1,33 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:datetime:Verbindlich">
+        <includeConstraint refId="isyfact:datetime:AufrufVonNowOderCurrentTimeMillis"/>
+    </group>
+
+    <constraint id="isyfact:datetime:AufrufVonNowOderCurrentTimeMillis">
+        <description>
+            Aufrufe von "System.currentTimeMillis()" sowie der Varianten von "now()" auf Typen
+            der Datums- und Zeittypen ohne Verwendung einer Clock bei Nutzung dieses Bausteins verboten.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(m:Member)-[i:INVOKES]->(method:Method)<-[:DECLARES]-(type:Type)
+            WHERE
+              type.fqn IN ["java.lang.System",
+                           "java.time.LocalTime",
+                           "java.time.LocalDateTime",
+                           "java.time.OffsetTime",
+                           "java.time.OffsetDateTime",
+                           "java.time.ZonedDateTime"]
+              AND method.signature IN ["long currentTimeMillis()",
+                                       "java.time.LocalTime now()",
+                                       "java.time.LocalDateTime now()",
+                                       "java.time.OffsetTime now()",
+                                       "java.time.OffsetDateTime now()",
+                                       "java.time.ZonedDateTime now()"]
+            RETURN
+              t.name AS Klasse, m.name AS METHODE, i.lineNumber AS AufrufVonNowOderCurrentTimeMillis
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

@@ -1,0 +1,47 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:fehlerbehandlung:Empfohlen">
+        <includeConstraint refId="isyfact:fehlerbehandlung:ExceptionsErbenVonPlisException"/>
+        <includeConstraint refId="isyfact:fehlerbehandlung:ServiceExceptionErbtVonPlisToException"/>
+    </group>
+
+    <constraint id="isyfact:fehlerbehandlung:ExceptionsErbenVonPlisException">
+        <description>
+            Werden in einer Anwendung Exceptions benötigt, so müssen zuerst vier eigene abstrakte Oberklassen
+            für die Anwendungs-Exceptions abgeleitet werden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "common"})-[:CONTAINS]->(:Package {name: "exception"})-[:CONTAINS]->(t:Type)-[:EXTENDS*]->(super:Type)
+            WHERE NOT
+              super.fqn IN [
+                  "de.bund.bva.pliscommon.exception.PlisBusinessException",
+                  "de.bund.bva.pliscommon.exception.PlisTechnicalException",
+                  "de.bund.bva.pliscommon.exception.PlisTechnicalRuntimeException"
+              ]
+            RETURN
+              t AS ExceptionErbtNichtVonPlisException
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:fehlerbehandlung:ServiceExceptionErbtVonPlisToException">
+        <description>
+            Für Exceptions an den Anwendungsschnittstellen gelten weitere Vorgaben: Sie erben immer von
+            PlisBusinessToException oder PlisTechnicalToException und implementieren somit immer Serializable.
+            Sie stellen die Felder Ausnahme-ID, UUID und Fehlernachricht zur Verfügung und erben nicht von
+            internen Anwendungsexceptions.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "service"})-[:CONTAINS*]->(t:Type)-[:DECLARES]->(m:Method)-[:THROWS]->(ex:Type)-[:EXTENDS*]->(superType:Type)
+            WHERE
+              NOT superType.fqn IN [
+                "de.bund.bva.pliscommon.exception.service.PlisBusinessToException",
+                "de.bund.bva.pliscommon.exception.service.PlisTechnicaloException"
+              ]
+            RETURN
+              t.name AS Typ, m.name AS Methode, ex.name AS ExceptionErbtNichtVonPlisToExceptions
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

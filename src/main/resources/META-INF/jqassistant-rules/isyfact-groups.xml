@@ -1,0 +1,25 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:Verbindlich">
+        <includeGroup refId="isyfact:batch:Verbindlich"/>
+        <includeGroup refId="isyfact:core:Verbindlich"/>
+        <includeGroup refId="isyfact:datetime:Verbindlich"/>
+        <includeGroup refId="isyfact:konfiguration:Verbindlich"/>
+        <includeGroup refId="isyfact:layer:Verbindlich"/>
+        <includeGroup refId="isyfact:logging:Verbindlich"/>
+        <includeGroup refId="isyfact:package:Verbindlich"/>
+        <includeGroup refId="isyfact:service:Verbindlich"/>
+    </group>
+
+    <group id="isyfact:Empfohlen">
+        <includeGroup refId="isyfact:batch:Empfohlen"/>
+        <includeGroup refId="isyfact:core:Empfohlen"/>
+        <includeGroup refId="isyfact:fehlerbehandlung:Empfohlen"/>
+        <includeGroup refId="isyfact:gui:Empfohlen"/>
+        <includeGroup refId="isyfact:konfiguration:Empfohlen"/>
+        <includeGroup refId="isyfact:persistence:Empfohlen"/>
+        <includeGroup refId="isyfact:service:Empfohlen"/>
+        <includeGroup refId="isyfact:ueberwachung:Empfohlen"/>
+    </group>
+
+</jqa:jqassistant-rules>

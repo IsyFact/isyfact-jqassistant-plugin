@@ -1,0 +1,54 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:batch:Verbindlich">
+        <includeConstraint refId="isyfact:batch:AusfuehrungsBeanDarfKeineTransaktionStarten"/>
+    </group>
+
+    <group id="isyfact:batch:Empfohlen">
+        <includeConstraint refId="isyfact:batch:BatchklassenMitPraefixBat"/>
+    </group>
+
+    <concept id="isyfact:batch:AusfuehrungsBean">
+        <description>Markiert Klassen, die das Interface "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" implementieren, mit "Batch:AusfuehrungsBean".</description>
+        <cypher><![CDATA[
+           MATCH
+             (batchAusfuehrungsBean:Type)-[:IMPLEMENTS]->(batchAusfuehrungsBeanType:Type)
+           WHERE
+             batchAusfuehrungsBeanType.fqn = "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean"
+           SET
+             batchAusfuehrungsBean:Batch:AusfuehrungsBean
+           RETURN
+             batchAusfuehrungsBean AS BatchAusfuehrungsBean
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:batch:AusfuehrungsBeanDarfKeineTransaktionStarten">
+        <requiresConcept refId="isyfact:batch:AusfuehrungsBean"/>
+        <description>Eine Ausführungsbean darf keine Transaktionen starten oder beenden.</description>
+        <cypher><![CDATA[
+            MATCH
+              (batchBean:AusfuehrungsBean)-[:DECLARES]->(methode:Method),
+              ()-[:ANNOTATED_BY]->()-[:OF_TYPE]->(annotationType:Type)
+            WHERE
+              ((batchBean)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(annotationType)
+              OR (methode)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(annotationType))
+              AND annotationType.fqn = "org.springframework.transaction.annotation.Transactional"
+            RETURN DISTINCT
+              batchBean.name AS BatchAusfuehrungsBeanMitTransactional
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:batch:BatchklassenMitPraefixBat">
+        <requiresConcept refId="isyfact:batch:AusfuehrungsBean"/>
+        <description>Analog zu den Anwendungsfällen werden Batchklassen mit dem Präfix "Bat" gekennzeichnet.</description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "batch"})-[:CONTAINS]->(t:Type)
+            WHERE
+              NOT t.name STARTS WITH "Bat"
+            RETURN
+              t.name AS BatchOhneBatPraefix
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>

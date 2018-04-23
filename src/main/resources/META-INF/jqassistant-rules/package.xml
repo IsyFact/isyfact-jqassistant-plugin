@@ -1,0 +1,66 @@
+<jqa:jqassistant-rules xmlns:jqa="http://www.buschmais.com/jqassistant/core/analysis/rules/schema/v1.1">
+
+    <group id="isyfact:package:Verbindlich">
+        <includeConstraint refId="isyfact:package:AlleJavaKlassenMuessenImWurzelPackageLiegen"/>
+        <includeConstraint refId="isyfact:package:WurzelPackageUndMavenKoordinatenStimmenUeberein"/>
+    </group>
+
+    <concept id="isyfact:package:Root">
+        <requiresConcept refId="isyfact:maven:MainArtifact"/>
+
+        <requiresParameter name="rootPackage" type="String"/>
+
+        <description>
+            Das Wurzel-Package einer Applikation wird mit "Root" markiert.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Main:Artifact)-[:CONTAINS]->(rootPackage:Package)
+            WHERE
+              rootPackage.fqn = {rootPackage}
+            SET
+              rootPackage:Root
+            RETURN
+              rootPackage AS RootPackage
+        ]]></cypher>
+    </concept>
+
+    <constraint id="isyfact:package:AlleJavaKlassenMuessenImWurzelPackageLiegen">
+        <requiresConcept refId="isyfact:maven:MainArtifact"/>
+        <requiresConcept refId="isyfact:package:Root"/>
+
+        <description>
+            Alle Java-Typen eines Projekts müssen innerhalb des Wurzel-Packages liegen.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Main:Artifact)-[:CONTAINS]->(type:Type),
+              (rootPackage:Root)
+            WHERE NOT
+              type.fqn STARTS WITH rootPackage.fqn
+            RETURN
+              type AS InvalidType
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:package:WurzelPackageUndMavenKoordinatenStimmenUeberein">
+        <requiresConcept refId="isyfact:maven:MainArtifact"/>
+        <requiresConcept refId="isyfact:package:Root"/>
+        <description>
+            Das Wurzel-Package stimmt mit "groupId" und "artifactId" überein.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (mainArtifact:Main),
+              (rootPackage:Root)
+            WITH
+              (mainArtifact.group + "." + mainArtifact.name) AS mavenKoordinaten,
+              rootPackage.fqn AS rootPackage
+            WHERE
+              rootPackage <> mavenKoordinaten
+            RETURN
+              rootPackage, mavenKoordinaten
+        ]]></cypher>
+    </constraint>
+
+</jqa:jqassistant-rules>
