@@ -64,7 +64,7 @@ Folgende Gruppen sind verfügbar:
   | isyfact:logging:Verbindlich       | _IsyLoggerMussVerwendetWerden_,
                                         _IsyLoggerMussStatischInitialisiertWerden_,
                                         _IsyLoggerMustBeDeclaredAsConstant_               |                                    |
-  | isyfact:package:Verbindlich       | _AlleJavaKlassenMuessenImWurzelPackageLiegen_,
+  | isyfact:package :Verbindlich       | _AlleJavaKlassenMuessenImWurzelPackageLiegen_,
                                         _WurzelPackageUndMavenKoordinatenStimmenUeberein_ |                                    |
   |                                   |                                                   | isyfact:persistence:Empfohlen      | _EntitiesLiegenInPackageEntity_,
                                                                                                                                  _EntitiesVerwendenKeineCompositeKeys_,
