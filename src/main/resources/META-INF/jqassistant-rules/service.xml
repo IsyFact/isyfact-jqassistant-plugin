@@ -13,13 +13,11 @@
 
     <concept id="isyfact:service:RemoteBeanInterface">
         <description>
-            Markiert Interfaces, deren Name mit "RemoteBean" endet, mit "Service:RemoteBeanInterface".
+            Markiert Interfaces aus dem Service Layer mit "Service:RemoteBeanInterface".
         </description>
         <cypher><![CDATA[
             MATCH
               (:Layer {name: "service"})-[:CONTAINS*]->(i:Interface)
-            WHERE
-              i.name ENDS WITH "RemoteBean"
             SET
               i:Service:RemoteBeanInterface
             RETURN
@@ -34,11 +32,11 @@
         </description>
         <cypher><![CDATA[
             MATCH
-             (:Layer {name: "service"})-[:CONTAINS*]->(i:Interface)
+              (rb:RemoteBeanInterface)
             WHERE
-              NOT i.name ENDS WITH "RemoteBean"
+              NOT rb.name ENDS WITH "RemoteBean"
             RETURN
-              i AS ServiceInterfaceOhneRemoteBeanEndung
+              rb AS ServiceInterfaceOhneRemoteBeanEndung
         ]]></cypher>
     </constraint>
 
@@ -86,11 +84,13 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (rbi:RemoteBeanInterface)-[:DECLARES]->(m:Method)
+              (rbi:RemoteBeanInterface)-[:DECLARES]->(m:Method)-[:HAS]->(p:Parameter {index: 0})-[:OF_TYPE]->(pt:Type)
             WHERE
-              NOT m.signature =~ ".+\\([a-z\\.0-9_]+(AufrufKontextTo|ClientAufrufKontextTo)(,.+|\\))?"
+              NOT pt.fqn IN
+                ["de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.AufrufKontextTo",
+                 "de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.ClientAufrufKontextTo"]
             RETURN
-              rbi.name AS RemoteBeanInterface, m.signature AS MethodeOhneAufrufKontextTo
+              rbi AS RemoteBean, m AS ServiceMethodeOhneAufrufKontext
         ]]></cypher>
     </constraint>
 

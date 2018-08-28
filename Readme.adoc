@@ -53,7 +53,7 @@ Folgende Gruppen sind verfügbar:
 |====
 2+| *isyfact:Verbindlich*                                                               2+| *isyfact:Empfohlen*
   | isyfact:batch:Verbindlich         | _AusfuehrungsBeanDarfKeineTransaktionStarten_     | isyfact:batch:Empfohlen            | _BatchklassenMitPraefixBat_
-  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _BusinessObjektMitBoSuffix_
+  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _GeschaeftsobjektMitBoSuffix_
   | isyfact:datetime:Verbindlich      | _AufrufVonNowOderCurrentTimeMillis_               |                                    |
   |                                   |                                                   | isyfact:fehlerbehandlung:Empfohlen | _ExceptionsErbenVonPlisException_, _ServiceExceptionErbtVonPlisToException_
   |                                   |                                                   | isyfact:gui:Empfohlen              | _ModelBeanSerializable_, _ModelBeanVerwendetAwkTypen_, _ModelBeanNameEnthaeltKomponente_, _ControllerBeanNameEnthaeltKomponente_, _ControllerBeanErbtVonAbstractGuiController_
@@ -72,7 +72,8 @@ Folgende Gruppen sind verfügbar:
                                                                                                                                  _DaoKlasseVonAbstractDaoAbgeleitet_,
                                                                                                                                  _KeineNamedQueriesUeberAnnotationen_,
                                                                                                                                  _KeineBulkQueries_,
-                                                                                                                                 _GenerationTypeAuto_
+                                                                                                                                 _GenerationTypeAuto_,
+                                                                                                                                 _KeinePlisDataSource_
   | isyfact:service:Verbindlich      | _ExceptionAnServiceSchnitstelle_,
                                        _ServiceSchnitstelleMitLoggingKontext_,
                                        _ServiceMethodenEnthaltenAufrufKontext_            |                                    |
