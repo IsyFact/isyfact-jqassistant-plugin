@@ -5,7 +5,8 @@
     </group>
 
     <group id="isyfact:core:Empfohlen">
-        <includeConstraint refId="isyfact:core:BusinessObjektMitBoSuffix"/>
+        <includeConstraint refId="isyfact:core:GeschaeftsobjektMitBoSuffix"/>
+        <includeConstraint refId="isyfact:core:KomponenteZugriffPersistenz"/>
     </group>
 
     <concept id="isyfact:core:CoreType">
@@ -20,16 +21,23 @@
         ]]></cypher>
     </concept>
 
-    <concept id="isyfact:core:BusinessObjekt">
+    <concept id="isyfact:core:Geschaeftsobjekt">
         <requiresConcept refId="isyfact:core:CoreType"/>
-        <description>Markiert Klassen innerhalb des Packages ".core.().ausgabedaten" mit "BusinessObjekt".</description>
+        <description>Unter Geschäftsobjekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im Anwendungskern verwendet werden..</description>
         <cypher><![CDATA[
             MATCH
-              (p:Package)-[:CONTAINS]->(ct:CoreType)
-            WHERE
-              p.fqn ENDS WITH ".ausgabedaten"
+              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:RETURNS]->(returnType:Type)<-[:CONTAINS*]-(:Root)
+            SET
+              returnType:Core:Geschaeftsobjekt
             RETURN
-              ct AS BusinessObjekt
+              returnType AS Geschaeftsobjekt
+            UNION
+            MATCH
+              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:HAS]->(:Parameter)-[:OF_TYPE]->(parameterType:Type)<-[:CONTAINS*]-(:Root)
+            SET
+              parameterType:Core:Geschaeftsobjekt
+            RETURN
+              parameterType AS Geschaeftsobjekt
         ]]></cypher>
     </concept>
 
@@ -51,16 +59,39 @@
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:core:BusinessObjektMitBoSuffix">
-        <requiresConcept refId="isyfact:core:BusinessObjekt"/>
-        <description>Unter Business-Objekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im Anwendungskern verwendet werden. Schema "(Entitaetsname)Bo"</description>
+    <constraint id="isyfact:core:GeschaeftsobjektMitBoSuffix">
+        <requiresConcept refId="isyfact:core:Geschaeftsobjekt"/>
+        <description>Namensschema für Geschäftsobjekte: "(Entitaetsname)Bo"</description>
         <cypher><![CDATA[
             MATCH
-              (bo:BusinessObjekt)
+              (bo:Geschaeftsobjekt)
             WHERE
               NOT bo.name ENDS WITH "Bo"
             RETURN
-              bo AS BusinessObjektOhneBoSuffix
+              bo AS GeschaeftsobjektOhneBoSuffix
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="isyfact:core:KomponenteZugriffPersistenz">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <requiresConcept refId="isyfact:persistence:PersistenceType"/>
+        <description>
+            Die Komponenten des Anwendungskerns besitzen die Datenhoheit auf Objekte, die ihnen eindeutig
+            zuzuordnen sind. Diese Objekte stammen aus den korrespondierenden Komponenten in der
+            Persistenz-Schicht. Nur die korrespondierende Anwendungskern-Komponente darf Änderungen an den
+            entsprechenden persistenten Objekten vornehmen.
+            Eine Ausnahme hierzu bildet die Komponente Basisdaten: Sie gibt die Entitäten an andere
+            Komponenten weiter, welche diese verändern und befüllen dürfen.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Layer {name: "core"})-[:CONTAINS]->(corePackage:Package)-[:CONTAINS]->(i:Interface)-[]->(pt:PersistenceType),
+              (:Layer {name: "persistence"})-[:CONTAINS]->(persistencePackage:Package)-[:CONTAINS*]->(pt)
+            WHERE
+              corePackage.name <> persistencePackage.name AND
+              persistencePackage.name <> "basisdaten"
+            RETURN DISTINCT
+              corePackage.name AS AWKKomponente, persistencePackage.name AS PersistenzKomponente
         ]]></cypher>
     </constraint>
 

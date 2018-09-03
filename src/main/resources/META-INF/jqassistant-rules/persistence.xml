@@ -8,6 +8,7 @@
         <includeConstraint refId="isyfact:persistence:KeineNamedQueriesUeberAnnotationen"/>
         <includeConstraint refId="isyfact:persistence:KeineBulkQueries"/>
         <includeConstraint refId="isyfact:persistence:GenerationTypeAuto"/>
+        <includeConstraint refId="isyfact:persistence:KeinePlisDataSource"/>
     </group>
 
     <concept id="isyfact:persistence:DaoInterface">
@@ -73,6 +74,7 @@
 
     <constraint id="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys">
         <requiresConcept refId="jpa2:Entity"/>
+        <requiresConcept refId="jpa2:EmbeddedId"/>
         <description>
             Der Primärschlüssel einer Entität besteht aus genau einem Attribut. Zusammengesetzte Schlüssel
             dürfen nicht verwendet werden.
@@ -82,7 +84,7 @@
               (e:Jpa:Entity)
             WHERE
               (e)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.IdClass"}) OR
-              (e)-[:DECLARES]->(:Field)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.EmbeddedId"})
+              (e)-[:DECLARES]->(:EmbeddedId)
             RETURN
               e AS EntityMitCompositeKey
         ]]></cypher>
@@ -166,7 +168,28 @@
               strategyAttribute.name = "strategy" AND NOT
               generationType.signature = "javax.persistence.GenerationType AUTO"
             RETURN
-              t.name AS Klasse ,m.name AS Member, generationType
+              t.name AS Klasse, m.name AS Member, generationType
         ]]></cypher>
     </constraint>
+
+    <constraint  id="isyfact:persistence:KeinePlisDataSource">
+        <requiresConcept refId="isyfact:spring:SpringXmlKonfiguration"/>
+        <description>
+            Als Datasource-Implementierung muss die Implementierung aus
+            de.bund.bva.pliscommon.persistence.datasource.PlisDataSource
+            genutzt werden.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:XmlConfiguration)-[:HAS_ELEMENT*]->(bean:Xml:Element {name: "bean"}),
+              (bean)-[:HAS_ATTRIBUTE]->(class:Xml:Attribute {name: "class", value: "de.bund.bva.pliscommon.persistence.datasource.PlisDataSource"})
+            WITH
+              count(bean) AS plisDataSourceCount
+            WHERE
+              plisDataSourceCount = 0
+            RETURN
+              plisDataSourceCount AS KeinePlisDataSource
+        ]]></cypher>
+    </constraint>
+
 </jqa:jqassistant-rules>
