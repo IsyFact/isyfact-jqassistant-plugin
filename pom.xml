@@ -6,7 +6,7 @@
 
     <groupId>de.bund.bva.isyfact</groupId>
     <artifactId>isyfact-jqassistant-plugin</artifactId>
-    <version>1.6.0.RC1</version>
+    <version>1.6.0.RC2</version>
 
 
 </project>
