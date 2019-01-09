@@ -37,7 +37,7 @@
             WHERE
               NOT superType.fqn IN [
                 "de.bund.bva.pliscommon.exception.service.PlisBusinessToException",
-                "de.bund.bva.pliscommon.exception.service.PlisTechnicaloException"
+                "de.bund.bva.pliscommon.exception.service.PlisTechnicalToException"
               ]
             RETURN
               t.name AS Typ, m.name AS Methode, ex.name AS ExceptionErbtNichtVonPlisToExceptions
