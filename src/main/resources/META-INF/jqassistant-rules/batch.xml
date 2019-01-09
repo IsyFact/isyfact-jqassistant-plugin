@@ -11,14 +11,21 @@
     <concept id="isyfact:batch:AusfuehrungsBean">
         <description>Markiert Klassen, die das Interface "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" implementieren, mit "Batch:AusfuehrungsBean".</description>
         <cypher><![CDATA[
-           MATCH
-             (batchAusfuehrungsBean:Type)-[:IMPLEMENTS]->(batchAusfuehrungsBeanType:Type)
-           WHERE
-             batchAusfuehrungsBeanType.fqn = "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean"
-           SET
-             batchAusfuehrungsBean:Batch:AusfuehrungsBean
-           RETURN
-             batchAusfuehrungsBean AS BatchAusfuehrungsBean
+            MATCH (batchBean:Type)-[:IMPLEMENTS*]->(batchAusfuehrungsBean:Type)
+            WHERE
+              batchAusfuehrungsBean.fqn = "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" AND
+              NOT EXISTS(batchBean.abstract)
+            SET
+              batchBean:Batch:AusfuehrungsBean
+            RETURN batchBean AS BatchBean
+            UNION
+            MATCH (batchBean:Type)-[:EXTENDS*]->(:Type)-[:IMPLEMENTS*]->(batchAusfuehrungsBean:Type)
+            WHERE
+              batchAusfuehrungsBean.fqn = "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" AND
+              NOT EXISTS(batchBean.abstract)
+            SET
+              batchBean:Batch:AusfuehrungsBean
+            RETURN batchBean as BatchBean
         ]]></cypher>
     </concept>
 
