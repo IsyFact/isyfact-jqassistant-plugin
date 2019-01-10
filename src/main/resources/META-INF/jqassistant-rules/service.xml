@@ -12,6 +12,7 @@
     </group>
 
     <concept id="isyfact:service:RemoteBeanInterface">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Interfaces aus dem Service Layer mit "Service:RemoteBeanInterface".
         </description>
@@ -86,6 +87,7 @@
             MATCH
               (rbi:RemoteBeanInterface)-[:DECLARES]->(m:Method)-[:HAS]->(p:Parameter {index: 0})-[:OF_TYPE]->(pt:Type)
             WHERE
+              m.signature <> "java.lang.String ping(java.lang.String)" AND
               NOT pt.fqn IN
                 ["de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.AufrufKontextTo",
                  "de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.ClientAufrufKontextTo"]
