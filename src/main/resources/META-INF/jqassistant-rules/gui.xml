@@ -53,9 +53,9 @@
             MATCH
               (modelBean:ModelBean)
             WHERE
-              NOT (modelBean)-[:IMPLEMENTS]->(:Type {fqn: "java.io.Serializable"})
+              NOT (modelBean)-[:IMPLEMENTS|EXTENDS*]->(:Type {fqn: "java.io.Serializable"})
             RETURN
-              modelBean AS ModelBeanImplementiertNichtSerializable
+              modelBean AS ModelBeanNichtSerializable
         ]]></cypher>
     </constraint>
 
