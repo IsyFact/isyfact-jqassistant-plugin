@@ -9,6 +9,7 @@
     </group>
 
     <concept id="isyfact:gui:ModelBean">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Klassen im Layer "gui", deren Name auf "Model" endet, mit "Gui:ModelBean".
         </description>
@@ -25,6 +26,7 @@
     </concept>
 
     <concept id="isyfact:gui:ControllerBean">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Klassen im Layer "gui", deren Name auf "Controller" endet, mit "Gui:ControllerBean".
         </description>
