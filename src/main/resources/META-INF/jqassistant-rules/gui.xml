@@ -89,7 +89,7 @@
               toLower(model.name) AS modelName, p.name AS packageName
             WHERE
               NOT modelName CONTAINS "abstract"
-              AND packageName + "model" <> modelName
+              AND NOT modelName =~ (packageName + ".*model")
             RETURN
               modelName AS ModelBeanName, packageName AS PackageName
         ]]></cypher>
@@ -109,7 +109,7 @@
               toLower(controller.name) AS controllerName, p.name AS packageName
             WHERE
               NOT controllerName CONTAINS "abstract"
-              AND packageName + "controller" <> controllerName
+              AND NOT controllerName =~ packageName + ".*controller"
             RETURN
               controllerName AS ControllerBeanName, packageName AS PackageName
         ]]></cypher>

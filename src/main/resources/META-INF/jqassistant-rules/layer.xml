@@ -88,6 +88,7 @@
             WHERE
               layer <> core
               AND NOT coreType:Interface
+              AND NOT coreType:Geschaeftsobjekt
             RETURN
               layer.name AS Layer, type.fqn AS Dependent, coreType.fqn AS CoreDependency
         ]]></cypher>
@@ -112,22 +113,6 @@
               (type1)-[:DEPENDS_ON]->(type2)
             RETURN
               layer1.name AS Layer, type1 AS Type, layer2.name AS LayerDependency, type2 AS TypeDependency
-        ]]></cypher>
-    </constraint>
-
-    <constraint id="isyfact:layer:UnusedDependencies">
-        <requiresConcept refId="isyfact:layer:DefinedDependencies"/>
-        <requiresConcept refId="isyfact:layer:Dependencies"/>
-        <description>
-            Definierte, aber unbenutzte Abhängigkeiten zwischen Layern sollten aus der Architekturdefinition entfernt werden.
-        </description>
-        <cypher><![CDATA[
-            MATCH
-              (layer1:Layer)-[:DEFINES_DEPENDENCY]->(layer2:Layer)
-            WHERE NOT
-              (layer1)-[:DEPENDS_ON]->(layer2)
-            RETURN
-              layer1.name AS Layer1, layer2.name AS Layer2
         ]]></cypher>
     </constraint>
 
