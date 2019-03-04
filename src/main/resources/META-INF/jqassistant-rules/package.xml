@@ -34,32 +34,33 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Main:Artifact)-[:CONTAINS]->(type:Type),
-              (rootPackage:Root)
-            WHERE NOT
-              type.fqn STARTS WITH rootPackage.fqn
+              (mainArtifact:Main)-[:CONTAINS]->(t:Type)
+            WHERE
+              NOT (:Root)-[:CONTAINS*]->(t)
             RETURN
-              type AS InvalidType
+              t AS TypeNichtImRootPackage
         ]]></cypher>
     </constraint>
 
     <constraint id="isyfact:package:WurzelPackageUndMavenKoordinatenStimmenUeberein">
         <requiresConcept refId="isyfact:maven:MainArtifact"/>
         <requiresConcept refId="isyfact:package:Root"/>
+
         <description>
-            Das Wurzel-Package stimmt mit "groupId" und "artifactId" überein.
+            Das Wurzel-Package stimmt mit groupId oder groupId und artifactId überein.
         </description>
         <cypher><![CDATA[
             MATCH
               (mainArtifact:Main),
               (rootPackage:Root)
             WITH
-              (mainArtifact.group + "." + mainArtifact.name) AS mavenKoordinaten,
+              mainArtifact.group AS groupId,
+              (mainArtifact.group + "." + mainArtifact.name) AS groupIdArtifactId,
               rootPackage.fqn AS rootPackage
             WHERE
-              rootPackage <> mavenKoordinaten
+              NOT (rootPackage = groupId OR rootPackage = groupIdArtifactId)
             RETURN
-              rootPackage, mavenKoordinaten
+              rootPackage, groupId, groupIdArtifactId
         ]]></cypher>
     </constraint>
 

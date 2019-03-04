@@ -5,7 +5,6 @@
         <includeConstraint refId="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys"/>
         <includeConstraint refId="isyfact:persistence:DaoInterfacesVonDaoAbgeleitet"/>
         <includeConstraint refId="isyfact:persistence:DaoKlasseVonAbstractDaoAbgeleitet"/>
-        <includeConstraint refId="isyfact:persistence:KeineNamedQueriesUeberAnnotationen"/>
         <includeConstraint refId="isyfact:persistence:KeineBulkQueries"/>
         <includeConstraint refId="isyfact:persistence:GenerationTypeAuto"/>
         <includeConstraint refId="isyfact:persistence:KeinePlisDataSource"/>
@@ -117,21 +116,6 @@
               NOT (di)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.AbstractDao"})
             RETURN
               di AS DaoImplNichtVonAbstractDaoAbgeleitet
-        ]]></cypher>
-    </constraint>
-
-    <constraint id="isyfact:persistence:KeineNamedQueriesUeberAnnotationen">
-        <description>
-            Die Konfiguration von Queries über Annotationen in Entitätsklassen ist verboten.
-        </description>
-        <cypher><![CDATA[
-            MATCH
-              (t:PersistenceType)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(namedQuery:Type)
-            WHERE
-              namedQuery.fqn IN ["javax.persistence.NamedQueries",
-                                 "javax.persistence.NamedQuery"]
-            RETURN
-              t AS EntitaetMitNamedQuery
         ]]></cypher>
     </constraint>
 

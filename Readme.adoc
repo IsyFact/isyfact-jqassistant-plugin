@@ -70,7 +70,6 @@ Folgende Gruppen sind verfügbar:
                                                                                                                                  _EntitiesVerwendenKeineCompositeKeys_,
                                                                                                                                  _DaoInterfacesVonDaoAbgeleitet_,
                                                                                                                                  _DaoKlasseVonAbstractDaoAbgeleitet_,
-                                                                                                                                 _KeineNamedQueriesUeberAnnotationen_,
                                                                                                                                  _KeineBulkQueries_,
                                                                                                                                  _GenerationTypeAuto_,
                                                                                                                                  _KeinePlisDataSource_
