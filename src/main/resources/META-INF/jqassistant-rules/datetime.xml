@@ -11,7 +11,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Member)-[i:INVOKES]->(method:Method)<-[:DECLARES]-(type:Type)
+              (t:ApplicationType)-[:DECLARES]->(m:Member)-[i:INVOKES]->(method:Method)<-[:DECLARES]-(type:Type)
             WHERE
               type.fqn IN ["java.lang.System",
                            "java.time.LocalTime",

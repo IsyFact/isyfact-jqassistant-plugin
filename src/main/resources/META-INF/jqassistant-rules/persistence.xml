@@ -63,7 +63,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (e:Jpa:Entity)
+              (e:Jpa:Entity:ApplicationType)
             WHERE
              NOT (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "entity"})-[:CONTAINS]->(e)
             RETURN
@@ -80,7 +80,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (e:Jpa:Entity)
+              (e:Jpa:Entity:ApplicationType)
             WHERE
               (e)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.IdClass"}) OR
               (e)-[:DECLARES]->(:EmbeddedId)
@@ -127,7 +127,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Method)-[i:INVOKES]->(executeUpdate:Method),
+              (t:ApplicationType)-[:DECLARES]->(m:Method)-[i:INVOKES]->(executeUpdate:Method),
               (query:Type)-[:DECLARES]->(executeUpdate:Method)
             WHERE
               query.fqn = "javax.persistence.Query" AND
@@ -143,7 +143,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Member)-[:ANNOTATED_BY]->(generatedValue),
+              (t:ApplicationType)-[:DECLARES]->(m:Member)-[:ANNOTATED_BY]->(generatedValue),
               (generatedValue)-[:OF_TYPE]->(generatedValueType:Type),
               (generatedValue)-[:HAS]->(strategyAttribute:Enum),
               (strategyAttribute)-[:IS]->(generationType:Member)

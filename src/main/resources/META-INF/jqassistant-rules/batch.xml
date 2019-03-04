@@ -12,7 +12,7 @@
         <description>Markiert Klassen, die das Interface "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" implementieren, mit "Batch:AusfuehrungsBean".</description>
         <cypher><![CDATA[
             MATCH
-              (batchBean:Type)
+              (batchBean:ApplicationType)
             WHERE
               (batchBean)-[:IMPLEMENTS|EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean"}) AND
               NOT EXISTS(batchBean.abstract)

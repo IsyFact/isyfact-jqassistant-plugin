@@ -60,7 +60,6 @@ Folgende Gruppen sind verfügbar:
   | isyfact:konfiguration:Verbindlich | _BenutzeKeineInternenKlassen_                     | isyfact:konfiguration:Empfohlen    | _SpeichereKeineKonfigurationsParameter_
   | isyfact:layer:Verbindlich         | _ZugriffAufCoreLayerUeberInterface_,
                                         _UndefinedDependencies_,
-                                        _UnusedDependencies_                              |                                    |
   | isyfact:logging:Verbindlich       | _IsyLoggerMussVerwendetWerden_,
                                         _IsyLoggerMussStatischInitialisiertWerden_,
                                         _IsyLoggerMustBeDeclaredAsConstant_               |                                    |

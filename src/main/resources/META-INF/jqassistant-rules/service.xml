@@ -65,7 +65,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (remoteBeanImpl:Type)-[:IMPLEMENTS]->(:RemoteBeanInterface),
+              (remoteBeanImpl:ApplicationType)-[:IMPLEMENTS]->(:RemoteBeanInterface),
               (remoteBeanImpl)-[:DECLARES]->(m:Method),
               ()-[:ANNOTATED_BY]->(:Annotation)-[:OF_TYPE]->(stelltLoggingKontextBereit:Type)
             WHERE

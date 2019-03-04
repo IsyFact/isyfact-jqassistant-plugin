@@ -25,6 +25,22 @@
         ]]></cypher>
     </concept>
 
+    <concept id="isyfact:package:ApplicationType">
+        <requiresConcept refId="isyfact:package:Root"/>
+
+        <description>
+            Markiert alle Klassen im Wurzel-Package mit ApplicationType
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Root)-[:CONTAINS*]->(t:Type)
+            SET
+              t:ApplicationType
+            RETURN
+              t AS ApplicationType
+        ]]></cypher>
+    </concept>
+
     <constraint id="isyfact:package:AlleJavaKlassenMuessenImWurzelPackageLiegen">
         <requiresConcept refId="isyfact:maven:MainArtifact"/>
         <requiresConcept refId="isyfact:package:Root"/>

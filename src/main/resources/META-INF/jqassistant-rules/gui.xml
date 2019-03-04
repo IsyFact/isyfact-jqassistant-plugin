@@ -109,7 +109,7 @@
               toLower(controller.name) AS controllerName, p.name AS packageName
             WHERE
               NOT controllerName CONTAINS "abstract"
-              AND NOT controllerName =~ packageName + ".*controller"
+              AND NOT controllerName =~ (packageName + ".*controller")
             RETURN
               controllerName AS ControllerBeanName, packageName AS PackageName
         ]]></cypher>

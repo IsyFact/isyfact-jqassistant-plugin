@@ -3,7 +3,6 @@
     <group id="isyfact:layer:Verbindlich">
         <includeConstraint refId="isyfact:layer:ZugriffAufCoreLayerUeberInterface"/>
         <includeConstraint refId="isyfact:layer:UndefinedDependencies"/>
-        <includeConstraint refId="isyfact:layer:UnusedDependencies"/>
     </group>
 
     <concept id="isyfact:layer:DefinedLayer">

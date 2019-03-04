@@ -57,7 +57,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(method:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(logger:Logger)
+              (type:ApplicationType)-[:DECLARES]->(method:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(logger:Logger)
             WHERE NOT
               logger:IsyLogger
             RETURN
@@ -94,7 +94,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(field:Field)-[:OF_TYPE]->(logger:Logger)
+              (type:ApplicationType)-[:DECLARES]->(field:Field)-[:OF_TYPE]->(logger:Logger)
             WHERE NOT (
               field.visibility = "private" AND
               EXISTS(field.static) AND
