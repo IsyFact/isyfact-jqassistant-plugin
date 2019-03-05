@@ -21,28 +21,145 @@
         ]]></cypher>
     </concept>
 
-    <concept id="isyfact:layer:DefinedDependencies">
+    <concept id="isyfact:layer:DefinedDependenciesGuiCore">
         <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung gui -> core.
         </description>
         <cypher><![CDATA[
-            MATCH
-              (gui:Layer {name:"gui"}),
-              (core:Layer {name:"core"}),
-              (persistence:Layer {name:"persistence"}),
-              (service:Layer {name:"service"}),
-              (batch:Layer {name:"batch"}),
-              (common:Layer {name:"common"})
+            MATCH (gui:Layer {name:"gui"})
+            MATCH (core:Layer {name:"core"})
             CREATE UNIQUE
-              (gui)-[g1:DEFINES_DEPENDENCY]->(core),
-              (gui)-[g2:DEFINES_DEPENDENCY]->(common),
-              (service)-[s1:DEFINES_DEPENDENCY]->(core),
-              (service)-[s2:DEFINES_DEPENDENCY]->(common),
-              (core)-[c1:DEFINES_DEPENDENCY]->(persistence),
-              (core)-[c2:DEFINES_DEPENDENCY]->(common),
-              (batch)-[b1:DEFINES_DEPENDENCY]->(core),
+              (gui)-[g1:DEFINES_DEPENDENCY]->(core)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesGuiCommon">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung gui -> common.
+        </description>
+        <cypher><![CDATA[
+            MATCH (gui:Layer {name:"gui"})
+            MATCH (common:Layer {name:"common"})
+            CREATE UNIQUE
+              (gui)-[g2:DEFINES_DEPENDENCY]->(common)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesServiceCore">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung service -> core.
+        </description>
+        <cypher><![CDATA[
+            MATCH (service:Layer {name:"service"})
+            MATCH (core:Layer {name:"core"})
+            CREATE UNIQUE
+              (service)-[s1:DEFINES_DEPENDENCY]->(core)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesServiceCommon">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung service -> common.
+        </description>
+        <cypher><![CDATA[
+            MATCH (service:Layer {name:"service"})
+            MATCH (common:Layer {name:"common"})
+            CREATE UNIQUE
+              (service)-[s2:DEFINES_DEPENDENCY]->(common)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesCorePersistence">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung core -> persistence.
+        </description>
+        <cypher><![CDATA[
+            MATCH (core:Layer {name:"core"})
+            MATCH (persistence:Layer {name:"persistence"})
+            CREATE UNIQUE
+              (core)-[c1:DEFINES_DEPENDENCY]->(persistence)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesCoreCommon">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung core -> common.
+        </description>
+        <cypher><![CDATA[
+            MATCH (core:Layer {name:"core"})
+            MATCH (common:Layer {name:"common"})
+            CREATE UNIQUE
+              (core)-[c2:DEFINES_DEPENDENCY]->(common)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesBatchCore">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung batch -> core.
+        </description>
+        <cypher><![CDATA[
+            MATCH (batch:Layer {name:"batch"})
+            MATCH (core:Layer {name:"core"})
+            CREATE UNIQUE
+              (batch)-[b1:DEFINES_DEPENDENCY]->(core)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesBatchCommon">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung batch -> common.
+        </description>
+        <cypher><![CDATA[
+            MATCH (batch:Layer {name:"batch"})
+            MATCH (common:Layer {name:"common"})
+            CREATE UNIQUE
               (batch)-[b2:DEFINES_DEPENDENCY]->(common)
+            RETURN
+              *
+        ]]></cypher>
+    </concept>
+
+    <concept id="isyfact:layer:DefinedDependenciesPersistenceCommon">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
+        <description>
+            Zwischen den Layern sind erlaubte Beziehungen mit "DEFINES_DEPENDENCY" festgelegt.
+            Erlaubt ist die Beziehung persistence -> common.
+        </description>
+        <cypher><![CDATA[
+            MATCH (persistence:Layer {name:"persistence"})
+            MATCH (common:Layer {name:"common"})
+            CREATE UNIQUE
+              (persistence)-[p1:DEFINES_DEPENDENCY]->(common)
             RETURN
               *
         ]]></cypher>
@@ -94,7 +211,15 @@
     </constraint>
 
     <constraint id="isyfact:layer:UndefinedDependencies">
-        <requiresConcept refId="isyfact:layer:DefinedDependencies"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesGuiCore"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesGuiCommon"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesCorePersistence"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesCoreCommon"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesServiceCore"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesServiceCommon"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesBatchCore"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesBatchCommon"/>
+        <requiresConcept refId="isyfact:layer:DefinedDependenciesPersistenceCommon"/>
         <requiresConcept refId="isyfact:layer:Dependencies"/>
         <description>
             Es dürfen keine undefinierten Abhängigkeiten zwischen Layern existieren.
@@ -103,7 +228,8 @@
             MATCH
               (layer1:Layer)-[:DEPENDS_ON]->(layer2:Layer)
             WHERE NOT
-              (layer1)-[:DEFINES_DEPENDENCY]->(layer2)
+              (layer1)-[:DEFINES_DEPENDENCY]->(layer2) AND
+              layer1.name <> layer2.name
             WITH
               layer1, layer2
             MATCH
