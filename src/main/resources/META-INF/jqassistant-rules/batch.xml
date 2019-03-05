@@ -40,14 +40,14 @@
 
     <constraint id="isyfact:batch:BatchklassenMitPraefixBat">
         <requiresConcept refId="isyfact:batch:AusfuehrungsBean"/>
-        <description>Analog zu den Anwendungsfällen werden Batchklassen mit dem Präfix "Bat" gekennzeichnet.</description>
+        <description>Batchklassen werden mit dem Suffix "Batch" gekennzeichnet.</description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "batch"})-[:CONTAINS]->(t:Type)
+              (batchBean:Batch:AusfuehrungsBean)
             WHERE
-              NOT t.name STARTS WITH "Bat"
+              NOT batchBean.name ENDS WITH "Batch"
             RETURN
-              t.name AS BatchOhneBatPraefix
+              batchBean.name AS BatchOhneBatchSuffix
         ]]></cypher>
     </constraint>
 
