@@ -23,21 +23,22 @@
 
     <concept id="isyfact:core:Geschaeftsobjekt">
         <requiresConcept refId="isyfact:core:CoreType"/>
-        <description>Unter Geschäftsobjekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im Anwendungskern verwendet werden..</description>
+        <description>
+            Unter Geschäftsobjekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im
+            Anwendungskern verwendet werden. Sie liegen in den Packages "eingabedaten", "ausgabedaten" oder
+            "daten" innerhalb des Packages einer Komponente.
+        </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:RETURNS]->(returnType:Type)<-[:CONTAINS*]-(:Root)
+              (datenPackage:Package)-[:CONTAINS]->(ct:CoreType)
+            WHERE
+              datenPackage.name = "eingabedaten" OR
+              datenPackage.name = "ausgabedaten" OR
+              datenPackage.name = "daten"
             SET
-              returnType:Core:Geschaeftsobjekt
+              ct:Core:Geschaeftsobjekt
             RETURN
-              returnType AS Geschaeftsobjekt
-            UNION
-            MATCH
-              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:HAS]->(:Parameter)-[:OF_TYPE]->(parameterType:Type)<-[:CONTAINS*]-(:Root)
-            SET
-              parameterType:Core:Geschaeftsobjekt
-            RETURN
-              parameterType AS Geschaeftsobjekt
+             ct AS Geschaeftsobjekt
         ]]></cypher>
     </concept>
 

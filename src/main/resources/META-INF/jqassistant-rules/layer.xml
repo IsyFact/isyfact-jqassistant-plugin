@@ -38,7 +38,7 @@
               (gui)-[g1:DEFINES_DEPENDENCY]->(core),
               (gui)-[g2:DEFINES_DEPENDENCY]->(common),
               (service)-[s1:DEFINES_DEPENDENCY]->(core),
-              (service)-[s2:DEFINES_DEPENDENCY]->(core),
+              (service)-[s2:DEFINES_DEPENDENCY]->(common),
               (core)-[c1:DEFINES_DEPENDENCY]->(persistence),
               (core)-[c2:DEFINES_DEPENDENCY]->(common),
               (batch)-[b1:DEFINES_DEPENDENCY]->(core),
@@ -82,7 +82,7 @@
         <cypher><![CDATA[
             MATCH
               (layer:Layer)-[:CONTAINS*]->(type:Type),
-              (core:Layer{name:"core"})-[:CONTAINS*]->(coreType:Type),
+              (core:Layer {name:"core"})-[:CONTAINS*]->(coreType:Type),
               (type)-[:DEPENDS_ON]->(coreType)
             WHERE
               layer <> core

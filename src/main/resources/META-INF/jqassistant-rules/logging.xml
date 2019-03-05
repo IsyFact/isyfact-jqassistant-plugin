@@ -79,7 +79,7 @@
             WITH
               getLogger
             MATCH
-              (type:Type)-[:DECLARES]->(method:Method)-[:INVOKES]->(getLogger)
+              (type:ApplicationType)-[:DECLARES]->(method:Method)-[:INVOKES]->(getLogger)
             WHERE
               method.signature <> "void <clinit>()"
             RETURN

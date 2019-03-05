@@ -50,9 +50,10 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (mainArtifact:Main)-[:CONTAINS]->(t:Type)
+              (mainArtifact:Main)-[:CONTAINS]->(t:Type),
+              (rootPackage:Root)
             WHERE
-              NOT (:Root)-[:CONTAINS*]->(t)
+              NOT t.fqn STARTS WITH rootPackage.fqn
             RETURN
               t AS TypeNichtImRootPackage
         ]]></cypher>
