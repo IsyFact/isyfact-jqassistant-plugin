@@ -12,7 +12,7 @@
             SET
               rootElement:Spring:XmlConfiguration
             RETURN
-              rootElement AS SpringXmlConfiguration
+              count(rootElement)
         ]]></cypher>
     </concept>
 

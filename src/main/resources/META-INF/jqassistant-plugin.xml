@@ -12,7 +12,7 @@
         <resource>logging.xml</resource>
         <resource>maven.xml</resource>
         <resource>package.xml</resource>
-        <resource>persistence.xml</resource>
+        <resource>persistenz.xml</resource>
         <resource>service.xml</resource>
         <resource>spring.xml</resource>
         <resource>ueberwachung.xml</resource>

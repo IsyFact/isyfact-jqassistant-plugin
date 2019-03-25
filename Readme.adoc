@@ -32,6 +32,11 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
                     </group>
                 </groups>
                 <!--continueOnError>true</continueOnError-->
+                <scanProperties>
+                    <xml.file.include>
+                        /resources/spring/*
+                    </xml.file.include>
+                </scanProperties>
             </configuration>
         </execution>
     </executions>
@@ -79,5 +84,17 @@ Folgende Gruppen sind verfügbar:
                                                                                                                                  _MBeanMitZugriffAufAWK_,
                                                                                                                                  _MBeanPackageStruktur_
 |====
+
+Für die Regel `KeinePlisDataSource` müssen die XML-Konfigurationsdateien von Spring gescannt werden.
+Hierzu ist der Pfad zu den XML-Dateien einzutragen.
+
+[source,xml]
+----
+<scanProperties>
+    <xml.file.include>
+        /resources/spring/*
+    </xml.file.include>
+</scanProperties>
+----
 
 

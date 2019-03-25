@@ -19,7 +19,7 @@
             SET
               mbean:ueberwachung:MBean
             RETURN
-              mbean AS Mbean
+              count(mbean)
         ]]></cypher>
     </concept>
 

@@ -22,7 +22,7 @@
             SET
               i:Service:RemoteBeanInterface
             RETURN
-              i AS RemoteBeanInterface
+              count(i)
         ]]></cypher>
     </concept>
 

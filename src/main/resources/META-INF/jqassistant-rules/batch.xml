@@ -18,7 +18,8 @@
               NOT EXISTS(batchBean.abstract)
             SET
               batchBean:Batch:AusfuehrungsBean
-            RETURN batchBean as BatchBean
+            RETURN
+              count(batchBean)
         ]]></cypher>
     </concept>
 

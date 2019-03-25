@@ -17,7 +17,7 @@
             SET
               coreType:Core:CoreType
             RETURN
-              coreType AS CoreType
+              count(coreType)
         ]]></cypher>
     </concept>
 
@@ -38,7 +38,7 @@
             SET
               ct:Core:Geschaeftsobjekt
             RETURN
-             ct AS Geschaeftsobjekt
+             count(ct)
         ]]></cypher>
     </concept>
 

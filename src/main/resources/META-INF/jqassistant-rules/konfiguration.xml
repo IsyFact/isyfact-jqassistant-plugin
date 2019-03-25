@@ -21,7 +21,7 @@
             SET
               konfiguration:Konfiguration
             RETURN
-              type.fqn AS Klasse, konfiguration.name AS Feld
+              count(konfiguration)
         ]]></cypher>
     </concept>
 

@@ -21,7 +21,7 @@
             SET
               modelBean:Gui:ModelBean
             RETURN
-              modelBean AS ModelBean
+              count(modelBean)
         ]]></cypher>
     </concept>
 
@@ -38,7 +38,7 @@
             SET
               controllerBean:Gui:ControllerBean
             RETURN
-              controllerBean AS ControllerBean
+              count(controllerBean)
         ]]></cypher>
     </concept>
 

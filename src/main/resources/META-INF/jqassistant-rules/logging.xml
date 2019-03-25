@@ -24,7 +24,7 @@
               isyLogger:IsyLogger,
               isyLogger:Logger
             RETURN
-              isyLogger AS IsyLogger
+              count(isyLogger)
         ]]></cypher>
     </concept>
 
@@ -45,7 +45,7 @@
             SET
               logger:Logger
             RETURN
-              logger AS Logger
+              count(logger)
         ]]></cypher>
     </concept>
 
