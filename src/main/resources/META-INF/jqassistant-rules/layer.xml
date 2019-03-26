@@ -28,12 +28,14 @@
             Erlaubt ist die Beziehung gui -> core.
         </description>
         <cypher><![CDATA[
-            MATCH (gui:Layer {name:"gui"})
-            MATCH (core:Layer {name:"core"})
+            MATCH
+              (gui:Layer {name:"gui"})
+            MATCH
+              (core:Layer {name:"core"})
             CREATE UNIQUE
               (gui)-[g1:DEFINES_DEPENDENCY]->(core)
             RETURN
-              *
+              count(g1)
         ]]></cypher>
     </concept>
 
@@ -44,12 +46,14 @@
             Erlaubt ist die Beziehung gui -> common.
         </description>
         <cypher><![CDATA[
-            MATCH (gui:Layer {name:"gui"})
-            MATCH (common:Layer {name:"common"})
+            MATCH
+              (gui:Layer {name:"gui"})
+            MATCH
+              (common:Layer {name:"common"})
             CREATE UNIQUE
               (gui)-[g2:DEFINES_DEPENDENCY]->(common)
             RETURN
-              *
+              count(g2)
         ]]></cypher>
     </concept>
 
@@ -60,12 +64,14 @@
             Erlaubt ist die Beziehung service -> core.
         </description>
         <cypher><![CDATA[
-            MATCH (service:Layer {name:"service"})
-            MATCH (core:Layer {name:"core"})
+            MATCH
+              (service:Layer {name:"service"})
+            MATCH
+              (core:Layer {name:"core"})
             CREATE UNIQUE
               (service)-[s1:DEFINES_DEPENDENCY]->(core)
             RETURN
-              *
+              count(s1)
         ]]></cypher>
     </concept>
 
@@ -76,12 +82,14 @@
             Erlaubt ist die Beziehung service -> common.
         </description>
         <cypher><![CDATA[
-            MATCH (service:Layer {name:"service"})
-            MATCH (common:Layer {name:"common"})
+            MATCH
+              (service:Layer {name:"service"})
+            MATCH
+              (common:Layer {name:"common"})
             CREATE UNIQUE
               (service)-[s2:DEFINES_DEPENDENCY]->(common)
             RETURN
-              *
+              count(s2)
         ]]></cypher>
     </concept>
 
@@ -92,12 +100,14 @@
             Erlaubt ist die Beziehung core -> persistence.
         </description>
         <cypher><![CDATA[
-            MATCH (core:Layer {name:"core"})
-            MATCH (persistence:Layer {name:"persistence"})
+            MATCH
+              (core:Layer {name:"core"})
+            MATCH
+              (persistence:Layer {name:"persistence"})
             CREATE UNIQUE
               (core)-[c1:DEFINES_DEPENDENCY]->(persistence)
             RETURN
-              *
+              count(c1)
         ]]></cypher>
     </concept>
 
@@ -108,12 +118,14 @@
             Erlaubt ist die Beziehung core -> common.
         </description>
         <cypher><![CDATA[
-            MATCH (core:Layer {name:"core"})
-            MATCH (common:Layer {name:"common"})
+            MATCH
+              (core:Layer {name:"core"})
+            MATCH
+              (common:Layer {name:"common"})
             CREATE UNIQUE
               (core)-[c2:DEFINES_DEPENDENCY]->(common)
             RETURN
-              *
+              count(c2)
         ]]></cypher>
     </concept>
 
@@ -124,12 +136,14 @@
             Erlaubt ist die Beziehung batch -> core.
         </description>
         <cypher><![CDATA[
-            MATCH (batch:Layer {name:"batch"})
-            MATCH (core:Layer {name:"core"})
+            MATCH
+              (batch:Layer {name:"batch"})
+            MATCH
+              (core:Layer {name:"core"})
             CREATE UNIQUE
               (batch)-[b1:DEFINES_DEPENDENCY]->(core)
             RETURN
-              *
+              count(b1)
         ]]></cypher>
     </concept>
 
@@ -140,12 +154,14 @@
             Erlaubt ist die Beziehung batch -> common.
         </description>
         <cypher><![CDATA[
-            MATCH (batch:Layer {name:"batch"})
-            MATCH (common:Layer {name:"common"})
+            MATCH
+              (batch:Layer {name:"batch"})
+            MATCH
+              (common:Layer {name:"common"})
             CREATE UNIQUE
               (batch)-[b2:DEFINES_DEPENDENCY]->(common)
             RETURN
-              *
+              count(b2)
         ]]></cypher>
     </concept>
 
@@ -156,12 +172,14 @@
             Erlaubt ist die Beziehung persistence -> common.
         </description>
         <cypher><![CDATA[
-            MATCH (persistence:Layer {name:"persistence"})
-            MATCH (common:Layer {name:"common"})
+            MATCH
+              (persistence:Layer {name:"persistence"})
+            MATCH
+              (common:Layer {name:"common"})
             CREATE UNIQUE
               (persistence)-[p1:DEFINES_DEPENDENCY]->(common)
             RETURN
-              *
+              count(p1)
         ]]></cypher>
     </concept>
 

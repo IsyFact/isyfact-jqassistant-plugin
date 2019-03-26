@@ -52,6 +52,24 @@
         ]]></cypher>
     </concept>
 
+    <concept id="isyfact:persistence:JpaEmbeddedId">
+        <description>
+            Markiert EmbeddedIds. Kopie von jpa2:EmbeddedId mit geändertem RETURN.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(member),
+              (member)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(a:Type)
+            WHERE
+              (member:Field or member:Method)
+              AND a.fqn="javax.persistence.EmbeddedId"
+            SET
+              member:Jpa:IsyEmbeddedId
+            RETURN
+              count(member)
+        ]]></cypher>
+    </concept>
+
 
     <constraint id="isyfact:persistence:EntitiesLiegenInPackageEntity">
         <requiresConcept refId="jpa2:Entity"/>
@@ -73,7 +91,7 @@
 
     <constraint id="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys">
         <requiresConcept refId="jpa2:Entity"/>
-        <requiresConcept refId="jpa2:EmbeddedId"/>
+        <requiresConcept refId="isyfact:persistence:JpaEmbeddedId"/>
         <description>
             Der Primärschlüssel einer Entität besteht aus genau einem Attribut. Zusammengesetzte Schlüssel
             dürfen nicht verwendet werden.
@@ -83,7 +101,7 @@
               (e:Jpa:Entity:ApplicationType)
             WHERE
               (e)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.IdClass"}) OR
-              (e)-[:DECLARES]->(:EmbeddedId)
+              (e)-[:DECLARES]->(:IsyEmbeddedId)
             RETURN
               e AS EntityMitCompositeKey
         ]]></cypher>
