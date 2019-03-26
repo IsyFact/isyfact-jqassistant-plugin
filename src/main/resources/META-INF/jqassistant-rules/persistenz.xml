@@ -16,7 +16,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(i:Interface)
+              (:Layer {name: "persistence"})-[:CONTAINS*]->(:Package {name: "dao"})-[:CONTAINS]->(i:Interface)
             SET
               i:Persistence:DaoInterface
             RETURN
@@ -30,7 +30,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(c:Class)
+              (:Layer {name: "persistence"})-[:CONTAINS*]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(c:Class)
             SET
               c:Persistence:DaoImpl
             RETURN

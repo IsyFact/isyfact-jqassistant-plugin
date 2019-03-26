@@ -5,7 +5,7 @@
     </group>
 
     <group id="isyfact:batch:Empfohlen">
-        <includeConstraint refId="isyfact:batch:BatchklassenMitPraefixBat"/>
+        <includeConstraint refId="isyfact:batch:NamenskonventionBatchklassen"/>
     </group>
 
     <concept id="isyfact:batch:AusfuehrungsBean">
@@ -39,16 +39,19 @@
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:batch:BatchklassenMitPraefixBat">
+    <constraint id="isyfact:batch:NamenskonventionBatchklassen">
         <requiresConcept refId="isyfact:batch:AusfuehrungsBean"/>
-        <description>Batchklassen werden mit dem Suffix "Batch" gekennzeichnet.</description>
+
+        <requiresParameter name="patternNameBatchklassen" type="String"/>
+
+        <description>Der Name von Batchklassen hält sich an die konfigurierte Konvention.</description>
         <cypher><![CDATA[
             MATCH
               (batchBean:Batch:AusfuehrungsBean)
             WHERE
-              NOT batchBean.name ENDS WITH "Batch"
+              NOT batchBean.name =~ {patternNameBatchklassen}
             RETURN
-              batchBean.name AS BatchOhneBatchSuffix
+              batchBean.name AS AbweichenderNameBatchklasse
         ]]></cypher>
     </constraint>
 

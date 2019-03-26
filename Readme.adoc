@@ -22,6 +22,8 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
             <configuration>
                 <ruleParameters>
                     <rootPackage>ROOT-PACKAGE-DER-ANWENDUNG</rootPackage>
+                    <patternNameGeschaeftsobjekt>.*Daten</patternNameGeschaeftsobjekt>
+                    <patternNameBatchklassen>.*Batch</patternNameBatchklassen>
                 </ruleParameters>
                 <groups>
                     <group>
@@ -31,7 +33,6 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
                         isyfact:Empfohlen
                     </group>
                 </groups>
-                <!--continueOnError>true</continueOnError-->
                 <scanProperties>
                     <xml.file.include>
                         /resources/spring/*
@@ -50,6 +51,12 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
 </plugin>
 ----
 
+Vor der Verwendung müssen folgende Parameter konfiguriert werden:
+
+* `rootPackage`: Das Wurzelpackage der Anwendung.
+* `patternNameGeschaeftsobjekt`: Regulärer Ausdruck für die Namen von Geschäftsobjekten.
+* `patternNameBatchklassen`: Regulörer Ausdruck für die Namen von Batchklassen.
+
 Im Abschnitt `groups` können Untermengen der Regeln ausgewählt werden.
 Folgende Gruppen sind verfügbar:
 
@@ -57,8 +64,8 @@ Folgende Gruppen sind verfügbar:
 [options="header"]
 |====
 2+| *isyfact:Verbindlich*                                                               2+| *isyfact:Empfohlen*
-  | isyfact:batch:Verbindlich         | _AusfuehrungsBeanDarfKeineTransaktionStarten_     | isyfact:batch:Empfohlen            | _BatchklassenMitPraefixBat_
-  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _GeschaeftsobjektMitBoSuffix_
+  | isyfact:batch:Verbindlich         | _AusfuehrungsBeanDarfKeineTransaktionStarten_     | isyfact:batch:Empfohlen            | _NamenskonventionBatchklassen_
+  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _NamenskonventionGeschaeftsobjekt_
   | isyfact:datetime:Verbindlich      | _AufrufVonNowOderCurrentTimeMillis_               |                                    |
   |                                   |                                                   | isyfact:fehlerbehandlung:Empfohlen | _ExceptionsErbenVonPlisException_, _ServiceExceptionErbtVonPlisToException_
   |                                   |                                                   | isyfact:gui:Empfohlen              | _ModelBeanSerializable_, _ModelBeanVerwendetAwkTypen_, _ModelBeanNameEnthaeltKomponente_, _ControllerBeanNameEnthaeltKomponente_, _ControllerBeanErbtVonAbstractGuiController_

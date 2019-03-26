@@ -5,7 +5,7 @@
     </group>
 
     <group id="isyfact:core:Empfohlen">
-        <includeConstraint refId="isyfact:core:GeschaeftsobjektMitBoSuffix"/>
+        <includeConstraint refId="isyfact:core:NamenskonventionGeschaeftsobjekt"/>
         <includeConstraint refId="isyfact:core:KomponenteZugriffPersistenz"/>
     </group>
 
@@ -60,16 +60,19 @@
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:core:GeschaeftsobjektMitBoSuffix">
+    <constraint id="isyfact:core:NamenskonventionGeschaeftsobjekt">
         <requiresConcept refId="isyfact:core:Geschaeftsobjekt"/>
-        <description>Namensschema für Geschäftsobjekte: "(Entitaetsname)Bo"</description>
+
+        <requiresParameter name="patternNameGeschaeftsobjekt" type="String"/>
+
+        <description>Der Name von Geschäftsobjekten hält sich an die konfigurierte Konvention</description>
         <cypher><![CDATA[
             MATCH
-              (bo:Geschaeftsobjekt)
+              (go:Geschaeftsobjekt)
             WHERE
-              NOT bo.name ENDS WITH "Bo"
+              NOT go.name =~ {patternNameGeschaeftsobjekt}
             RETURN
-              bo AS GeschaeftsobjektOhneBoSuffix
+              go AS AbweichenderNameGeschaeftsobjekt
         ]]></cypher>
     </constraint>
 

@@ -7,20 +7,14 @@
 
     <constraint id="isyfact:fehlerbehandlung:ExceptionsErbenVonPlisException">
         <description>
-            Werden in einer Anwendung Exceptions benötigt, so müssen zuerst vier eigene abstrakte Oberklassen
-            für die Anwendungs-Exceptions abgeleitet werden.
+            Die Oberklassen für Exceptions aus isy-exception-core sind für alle
+            Exceptions innerhalb einer Anwendung zu verwenden.
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "common"})-[:CONTAINS]->(:Package {name: "exception"})-[:CONTAINS]->(t:Type)-[:EXTENDS*]->(super:Type)
-            WHERE NOT
-              super.fqn IN [
-                  "de.bund.bva.pliscommon.exception.PlisBusinessException",
-                  "de.bund.bva.pliscommon.exception.PlisTechnicalException",
-                  "de.bund.bva.pliscommon.exception.PlisTechnicalRuntimeException"
-              ]
+              (exception:ApplicationType)-[:EXTENDS*]->(javaException:Type {fqn: "java.lang.Exception"})
             RETURN
-              t AS ExceptionErbtNichtVonPlisException
+              exception AS ExceptionErbtVonJavaLangException
         ]]></cypher>
     </constraint>
 
