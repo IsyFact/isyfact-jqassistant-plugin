@@ -32,9 +32,10 @@
             MATCH
               (datenPackage:Package)-[:CONTAINS]->(ct:CoreType)
             WHERE
-              datenPackage.name = "eingabedaten" OR
-              datenPackage.name = "ausgabedaten" OR
-              datenPackage.name = "daten"
+              (datenPackage.name = "eingabedaten" OR
+               datenPackage.name = "ausgabedaten" OR
+               datenPackage.name = "daten") AND
+              NOT ct:Enum
             SET
               ct:Core:Geschaeftsobjekt
             RETURN
