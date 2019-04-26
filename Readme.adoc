@@ -79,8 +79,9 @@ Folgende Gruppen sind verfügbar:
                                         _WurzelPackageUndMavenKoordinatenStimmenUeberein_ |                                    |
   |                                   |                                                   | isyfact:persistence:Empfohlen      | _EntitiesLiegenInPackageEntity_,
                                                                                                                                  _EntitiesVerwendenKeineCompositeKeys_,
-                                                                                                                                 _DaoInterfacesVonDaoAbgeleitet_,
-                                                                                                                                 _DaoKlasseVonAbstractDaoAbgeleitet_,
+                                                                                                                                 _DaoImplPackage_,
+                                                                                                                                 _DaoVonAbstractDaoAbgeleitet_,
+                                                                                                                                 _DaoImplementiertDaoInterface´_,
                                                                                                                                  _KeineBulkQueries_,
                                                                                                                                  _GenerationTypeAuto_,
                                                                                                                                  _KeinePlisDataSource_
