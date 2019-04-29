@@ -5,20 +5,21 @@
     </group>
 
     <group id="isyfact:batch:Empfohlen">
-        <includeConstraint refId="isyfact:batch:BatchklassenMitPraefixBat"/>
+        <includeConstraint refId="isyfact:batch:NamenskonventionBatchklassen"/>
     </group>
 
     <concept id="isyfact:batch:AusfuehrungsBean">
         <description>Markiert Klassen, die das Interface "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean" implementieren, mit "Batch:AusfuehrungsBean".</description>
         <cypher><![CDATA[
-           MATCH
-             (batchAusfuehrungsBean:Type)-[:IMPLEMENTS]->(batchAusfuehrungsBeanType:Type)
-           WHERE
-             batchAusfuehrungsBeanType.fqn = "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean"
-           SET
-             batchAusfuehrungsBean:Batch:AusfuehrungsBean
-           RETURN
-             batchAusfuehrungsBean AS BatchAusfuehrungsBean
+            MATCH
+              (batchBean:ApplicationType)
+            WHERE
+              (batchBean)-[:IMPLEMENTS|EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.batchrahmen.batch.rahmen.BatchAusfuehrungsBean"}) AND
+              NOT EXISTS(batchBean.abstract)
+            SET
+              batchBean:Batch:AusfuehrungsBean
+            RETURN
+              count(batchBean)
         ]]></cypher>
     </concept>
 
@@ -38,16 +39,19 @@
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:batch:BatchklassenMitPraefixBat">
+    <constraint id="isyfact:batch:NamenskonventionBatchklassen">
         <requiresConcept refId="isyfact:batch:AusfuehrungsBean"/>
-        <description>Analog zu den Anwendungsfällen werden Batchklassen mit dem Präfix "Bat" gekennzeichnet.</description>
+
+        <requiresParameter name="patternNameBatchklassen" type="String"/>
+
+        <description>Der Name von Batchklassen hält sich an die konfigurierte Konvention.</description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "batch"})-[:CONTAINS]->(t:Type)
+              (batchBean:Batch:AusfuehrungsBean)
             WHERE
-              NOT t.name STARTS WITH "Bat"
+              NOT batchBean.name =~ {patternNameBatchklassen}
             RETURN
-              t.name AS BatchOhneBatPraefix
+              batchBean.name AS AbweichenderNameBatchklasse
         ]]></cypher>
     </constraint>
 

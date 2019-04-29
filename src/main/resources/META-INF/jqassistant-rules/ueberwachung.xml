@@ -7,18 +7,19 @@
     </group>
 
     <concept id="isyfact:ueberwachung:MBean">
+        <requiresConcept refId="isyfact:package:ApplicationType"/>
         <description>
             Markiert ManagedBeans  mit "mbean:ueberwachung:MBean".
         </description>
         <cypher><![CDATA[
             MATCH
-              (mbean:Type)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(managedResource:Type)
+              (mbean:ApplicationType)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(managedResource:Type)
             WHERE
               managedResource.fqn = "org.springframework.jmx.export.annotation.ManagedResource"
             SET
               mbean:ueberwachung:MBean
             RETURN
-              mbean AS Mbean
+              count(mbean)
         ]]></cypher>
     </concept>
 

@@ -8,17 +8,23 @@
 
     <concept id="isyfact:logging:IsyLogger">
         <description>
-            Markiert den Logger vom Typ "de.bund.bva.isyfact.logging.IsyLogger" mit "IsyLogger".
+            Markiert den Logger von isy-logging mit "IsyLogger".
         </description>
         <cypher><![CDATA[
             MATCH
               (isyLogger:Type)
             WHERE
-              isyLogger.fqn = "de.bund.bva.isyfact.logging.IsyLogger"
+              isyLogger.fqn IN
+              ["de.bund.bva.isyfact.logging.IsyLogger",
+               "de.bund.bva.isyfact.logging.IsyLoggerStandard",
+               "de.bund.bva.isyfact.logging.IsyLoggerFachdaten",
+               "de.bund.bva.isyfact.logging.IsyLoggerTypisiert"
+              ]
             SET
-              isyLogger:IsyLogger
+              isyLogger:IsyLogger,
+              isyLogger:Logger
             RETURN
-              isyLogger AS IsyLogger
+              count(isyLogger)
         ]]></cypher>
     </concept>
 
@@ -39,7 +45,7 @@
             SET
               logger:Logger
             RETURN
-              logger AS Logger
+              count(logger)
         ]]></cypher>
     </concept>
 
@@ -51,7 +57,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(method:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(logger:Logger)
+              (type:ApplicationType)-[:DECLARES]->(method:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(logger:Logger)
             WHERE NOT
               logger:IsyLogger
             RETURN
@@ -73,7 +79,7 @@
             WITH
               getLogger
             MATCH
-              (type:Type)-[:DECLARES]->(method:Method)-[:INVOKES]->(getLogger)
+              (type:ApplicationType)-[:DECLARES]->(method:Method)-[:INVOKES]->(getLogger)
             WHERE
               method.signature <> "void <clinit>()"
             RETURN
@@ -88,14 +94,14 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(field:Field)-[:OF_TYPE]->(logger:Logger)
+              (type:ApplicationType)-[:DECLARES]->(field:Field)-[:OF_TYPE]->(logger:Logger)
             WHERE NOT (
               field.visibility = "private" AND
-              HAS(field.static) AND
-              HAS(field.final)
+              EXISTS(field.static) AND
+              EXISTS(field.final)
             )
             RETURN
-              type AS Type, field AS InvalidDeclaration            
+              type AS Type, field AS InvalidDeclaration
         ]]></cypher>
     </constraint>
 

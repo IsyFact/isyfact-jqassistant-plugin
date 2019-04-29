@@ -12,6 +12,7 @@
     </group>
 
     <concept id="isyfact:service:RemoteBeanInterface">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Interfaces aus dem Service Layer mit "Service:RemoteBeanInterface".
         </description>
@@ -21,7 +22,7 @@
             SET
               i:Service:RemoteBeanInterface
             RETURN
-              i AS RemoteBeanInterface
+              count(i)
         ]]></cypher>
     </concept>
 
@@ -64,7 +65,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (remoteBeanImpl:Type)-[:IMPLEMENTS]->(:RemoteBeanInterface),
+              (remoteBeanImpl:ApplicationType)-[:IMPLEMENTS]->(:RemoteBeanInterface),
               (remoteBeanImpl)-[:DECLARES]->(m:Method),
               ()-[:ANNOTATED_BY]->(:Annotation)-[:OF_TYPE]->(stelltLoggingKontextBereit:Type)
             WHERE
@@ -86,6 +87,7 @@
             MATCH
               (rbi:RemoteBeanInterface)-[:DECLARES]->(m:Method)-[:HAS]->(p:Parameter {index: 0})-[:OF_TYPE]->(pt:Type)
             WHERE
+              m.signature <> "java.lang.String ping(java.lang.String)" AND
               NOT pt.fqn IN
                 ["de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.AufrufKontextTo",
                  "de.bund.bva.pliscommon.serviceapi.service.httpinvoker.v1_0_0.ClientAufrufKontextTo"]

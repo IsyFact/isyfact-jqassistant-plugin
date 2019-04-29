@@ -9,6 +9,7 @@
     </group>
 
     <concept id="isyfact:gui:ModelBean">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Klassen im Layer "gui", deren Name auf "Model" endet, mit "Gui:ModelBean".
         </description>
@@ -20,11 +21,12 @@
             SET
               modelBean:Gui:ModelBean
             RETURN
-              modelBean AS ModelBean
+              count(modelBean)
         ]]></cypher>
     </concept>
 
     <concept id="isyfact:gui:ControllerBean">
+        <requiresConcept refId="isyfact:layer:DefinedLayer"/>
         <description>
             Markiert Klassen im Layer "gui", deren Name auf "Controller" endet, mit "Gui:ControllerBean".
         </description>
@@ -36,7 +38,7 @@
             SET
               controllerBean:Gui:ControllerBean
             RETURN
-              controllerBean AS ControllerBean
+              count(controllerBean)
         ]]></cypher>
     </concept>
 
@@ -51,9 +53,9 @@
             MATCH
               (modelBean:ModelBean)
             WHERE
-              NOT (modelBean)-[:IMPLEMENTS]->(:Type {fqn: "java.io.Serializable"})
+              NOT (modelBean)-[:IMPLEMENTS|EXTENDS*]->(:Type {fqn: "java.io.Serializable"})
             RETURN
-              modelBean AS ModelBeanImplementiertNichtSerializable
+              modelBean AS ModelBeanNichtSerializable
         ]]></cypher>
     </constraint>
 
@@ -87,7 +89,7 @@
               toLower(model.name) AS modelName, p.name AS packageName
             WHERE
               NOT modelName CONTAINS "abstract"
-              AND packageName + "model" <> modelName
+              AND NOT modelName =~ (packageName + ".*model")
             RETURN
               modelName AS ModelBeanName, packageName AS PackageName
         ]]></cypher>
@@ -107,7 +109,7 @@
               toLower(controller.name) AS controllerName, p.name AS packageName
             WHERE
               NOT controllerName CONTAINS "abstract"
-              AND packageName + "controller" <> controllerName
+              AND NOT controllerName =~ (packageName + ".*controller")
             RETURN
               controllerName AS ControllerBeanName, packageName AS PackageName
         ]]></cypher>

@@ -3,41 +3,43 @@
     <group id="isyfact:persistence:Empfohlen">
         <includeConstraint refId="isyfact:persistence:EntitiesLiegenInPackageEntity"/>
         <includeConstraint refId="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys"/>
-        <includeConstraint refId="isyfact:persistence:DaoInterfacesVonDaoAbgeleitet"/>
-        <includeConstraint refId="isyfact:persistence:DaoKlasseVonAbstractDaoAbgeleitet"/>
-        <includeConstraint refId="isyfact:persistence:KeineNamedQueriesUeberAnnotationen"/>
+        <includeConstraint refId="isyfact:persistence:DaoImplPackage"/>
+        <includeConstraint refId="isyfact:persistence:DaoVonAbstractDaoAbgeleitet"/>
+        <includeConstraint refÍd="isyfact:persistence:DaoImplementiertDaoInterface"/>
         <includeConstraint refId="isyfact:persistence:KeineBulkQueries"/>
         <includeConstraint refId="isyfact:persistence:GenerationTypeAuto"/>
         <includeConstraint refId="isyfact:persistence:KeinePlisDataSource"/>
     </group>
 
-    <concept id="isyfact:persistence:DaoInterface">
+    <concept id="isyfact:persistence:Dao">
         <description>
-            Markiert Interfaces im Package "(ROOT).persistence.(komponente).dao" mit "DaoInterface".
+            Ein DAO ist ein Klasse, die im Package *.dao.impl liegt oder von AbstractDao ableitet oder
+            ein DAO-Interface implementiert
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(i:Interface)
+              (:Layer {name: "persistence"})-[:CONTAINS*]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(dao:Class)
             SET
-              i:Persistence:DaoInterface
+              dao:Persistence:Dao
             RETURN
-              i AS DaoInterface
+              count(dao)
+            UNION
+            MATCH
+              (dao:ApplicationType)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.AbstractDao"})
+            SET
+              dao:Persistence:Dao
+            RETURN
+              count(dao)
+            UNION
+            MATCH
+              (dao:ApplicationType:Class)-[:IMPLEMENTS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.Dao"})
+            SET
+              dao:Persistence:Dao
+            RETURN
+              count(dao)
         ]]></cypher>
     </concept>
 
-    <concept id="isyfact:persistence:DaoImpl">
-        <description>
-            Markiert Klassen im Package "(ROOT).persistence.(komponente).dao.impl" mit "DaoImpl".
-        </description>
-        <cypher><![CDATA[
-            MATCH
-              (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(c:Class)
-            SET
-              c:Persistence:DaoImpl
-            RETURN
-              c AS DaoImpl
-        ]]></cypher>
-    </concept>
 
     <concept id="isyfact:persistence:PersistenceType">
         <description>
@@ -53,6 +55,23 @@
         ]]></cypher>
     </concept>
 
+    <concept id="isyfact:persistence:JpaEmbeddedId">
+        <description>
+            Markiert EmbeddedIds. Kopie von jpa2:EmbeddedId mit geändertem RETURN.
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (t:Type)-[:DECLARES]->(member),
+              (member)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(a:Type)
+            WHERE
+              (member:Field or member:Method)
+              AND a.fqn="javax.persistence.EmbeddedId"
+            SET
+              member:Jpa:IsyEmbeddedId
+            RETURN
+              count(member)
+        ]]></cypher>
+    </concept>
 
     <constraint id="isyfact:persistence:EntitiesLiegenInPackageEntity">
         <requiresConcept refId="jpa2:Entity"/>
@@ -64,7 +83,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (e:Jpa:Entity)
+              (e:Jpa:Entity:ApplicationType)
             WHERE
              NOT (:Layer {name: "persistence"})-[:CONTAINS*1..2]->(:Package {name: "entity"})-[:CONTAINS]->(e)
             RETURN
@@ -74,64 +93,64 @@
 
     <constraint id="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys">
         <requiresConcept refId="jpa2:Entity"/>
-        <requiresConcept refId="jpa2:EmbeddedId"/>
+        <requiresConcept refId="isyfact:persistence:JpaEmbeddedId"/>
         <description>
             Der Primärschlüssel einer Entität besteht aus genau einem Attribut. Zusammengesetzte Schlüssel
             dürfen nicht verwendet werden.
         </description>
         <cypher><![CDATA[
             MATCH
-              (e:Jpa:Entity)
+              (e:Jpa:Entity:ApplicationType)
             WHERE
               (e)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(:Type {fqn: "javax.persistence.IdClass"}) OR
-              (e)-[:DECLARES]->(:EmbeddedId)
+              (e)-[:DECLARES]->(:IsyEmbeddedId)
             RETURN
               e AS EntityMitCompositeKey
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:persistence:DaoInterfacesVonDaoAbgeleitet">
-        <requiresConcept refId="isyfact:persistence:DaoInterface"/>
+    <constraint id="isyfact:persistence:DaoImplPackage">
+        <requiresConcept refId="isyfact:persistence:Dao"/>
         <description>
-            Für ein konkretes DAO ist eine eigene Schnittstelle von der Basisschnittstelle Dao abzuleiten.
+            Ein DAO liegt im Package *.persistence.*.dao.impl.
         </description>
         <cypher><![CDATA[
             MATCH
-              (daoif:DaoInterface)
+              (d:Dao)
             WHERE
-              NOT (daoif)-[:IMPLEMENTS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.Dao"})
+              NOT (:Layer {name: "persistence"})-[:CONTAINS*]->(:Package {name: "dao"})-[:CONTAINS]->(:Package {name: "impl"})-[:CONTAINS]->(d)
             RETURN
-              daoif AS DaoInterfaceNichtVonDaoAbgeleitet
+              d AS DaoImFalschenPackage
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:persistence:DaoKlasseVonAbstractDaoAbgeleitet">
-        <requiresConcept refId="isyfact:persistence:DaoImpl"/>
+    <constraint id="isyfact:persistence:DaoVonAbstractDaoAbgeleitet">
+        <requiresConcept refId="isyfact:persistence:Dao"/>
         <description>
-            Die Implementierungsklasse des konkreten DAOs ist von AbstractDao abzuleiten.
+            Ein DAO ist von AbstractDao abgeleitet.
         </description>
         <cypher><![CDATA[
             MATCH
-              (di:DaoImpl)
+              (d:Dao)
             WHERE
-              NOT (di)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.AbstractDao"})
+              NOT (d)-[:EXTENDS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.AbstractDao"})
             RETURN
-              di AS DaoImplNichtVonAbstractDaoAbgeleitet
+              d AS DaoNichtVonAbstractDaoAbgeleitet
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:persistence:KeineNamedQueriesUeberAnnotationen">
+    <constraint id="isyfact:persistence:DaoImplementiertDaoInterface">
+        <requiresConcept refId="isyfact:persistence:Dao"/>
         <description>
-            Die Konfiguration von Queries über Annotationen in Entitätsklassen ist verboten.
+            Ein DAO implementiert das Dao-Interface.
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:PersistenceType)-[:ANNOTATED_BY]->()-[:OF_TYPE]->(namedQuery:Type)
+              (d:Dao)
             WHERE
-              namedQuery.fqn IN ["javax.persistence.NamedQueries",
-                                 "javax.persistence.NamedQuery"]
+              NOT (d)-[:IMPLEMENTS*]->(:Type {fqn: "de.bund.bva.pliscommon.persistence.dao.Dao"})
             RETURN
-              t AS EntitaetMitNamedQuery
+              d AS DaoImplementiertNichtDaoInterface
         ]]></cypher>
     </constraint>
 
@@ -143,7 +162,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Method)-[i:INVOKES]->(executeUpdate:Method),
+              (t:ApplicationType)-[:DECLARES]->(m:Method)-[i:INVOKES]->(executeUpdate:Method),
               (query:Type)-[:DECLARES]->(executeUpdate:Method)
             WHERE
               query.fqn = "javax.persistence.Query" AND
@@ -159,7 +178,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Member)-[:ANNOTATED_BY]->(generatedValue),
+              (t:ApplicationType)-[:DECLARES]->(m:Member)-[:ANNOTATED_BY]->(generatedValue),
               (generatedValue)-[:OF_TYPE]->(generatedValueType:Type),
               (generatedValue)-[:HAS]->(strategyAttribute:Enum),
               (strategyAttribute)-[:IS]->(generationType:Member)

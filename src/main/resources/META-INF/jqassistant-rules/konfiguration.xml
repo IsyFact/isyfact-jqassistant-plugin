@@ -15,13 +15,13 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(konfiguration:Field)-[:OF_TYPE]->(fieldType:Type)
+              (type:ApplicationType)-[:DECLARES]->(konfiguration:Field)-[:OF_TYPE]->(fieldType:Type)
             WHERE
               fieldType.fqn = "de.bund.bva.pliscommon.konfiguration.common.Konfiguration"
             SET
               konfiguration:Konfiguration
             RETURN
-              type.fqn AS Klasse, konfiguration.name AS Feld
+              count(konfiguration)
         ]]></cypher>
     </concept>
 
@@ -32,7 +32,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DEPENDS_ON]->(fieldType:Type)
+              (type:ApplicationType)-[:DEPENDS_ON]->(fieldType:Type)
             WHERE
               fieldType.fqn STARTS WITH "de.bund.bva.pliscommon.konfiguration.common.impl."
             RETURN
@@ -47,7 +47,7 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (type:Type)-[:DECLARES]->(field:Field)<-[writes:WRITES]-(:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(:Konfiguration:Type)
+              (type:ApplicationType)-[:DECLARES]->(field:Field)<-[writes:WRITES]-(:Method)-[invokes:INVOKES]->(:Method)<-[:DECLARES]-(:Konfiguration:Type)
             WHERE
               writes.lineNumber = invokes.lineNumber
             RETURN

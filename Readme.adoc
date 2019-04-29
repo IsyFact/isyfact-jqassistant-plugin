@@ -11,7 +11,7 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
 <plugin>
     <groupId>com.buschmais.jqassistant</groupId>
     <artifactId>jqassistant-maven-plugin</artifactId>
-    <version>${jqassistant.version}</version>
+    <version>1.6.0</version>
     <executions>
         <execution>
             <id>default-cli</id>
@@ -22,6 +22,8 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
             <configuration>
                 <ruleParameters>
                     <rootPackage>ROOT-PACKAGE-DER-ANWENDUNG</rootPackage>
+                    <patternNameGeschaeftsobjekt>.*Daten</patternNameGeschaeftsobjekt>
+                    <patternNameBatchklassen>.*Batch</patternNameBatchklassen>
                 </ruleParameters>
                 <groups>
                     <group>
@@ -31,7 +33,11 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
                         isyfact:Empfohlen
                     </group>
                 </groups>
-                <!--continueOnError>true</continueOnError-->
+                <scanProperties>
+                    <xml.file.include>
+                        /resources/spring/*
+                    </xml.file.include>
+                </scanProperties>
             </configuration>
         </execution>
     </executions>
@@ -39,11 +45,17 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isyfact-jqassistant-plugin</artifactId>
-            <version>1.6.0</version>
+            <version>1.7.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </plugin>
 ----
+
+Vor der Verwendung müssen folgende Parameter konfiguriert werden:
+
+* `rootPackage`: Das Wurzelpackage der Anwendung.
+* `patternNameGeschaeftsobjekt`: Regulärer Ausdruck für die Namen von Geschäftsobjekten.
+* `patternNameBatchklassen`: Regulörer Ausdruck für die Namen von Batchklassen.
 
 Im Abschnitt `groups` können Untermengen der Regeln ausgewählt werden.
 Folgende Gruppen sind verfügbar:
@@ -52,15 +64,14 @@ Folgende Gruppen sind verfügbar:
 [options="header"]
 |====
 2+| *isyfact:Verbindlich*                                                               2+| *isyfact:Empfohlen*
-  | isyfact:batch:Verbindlich         | _AusfuehrungsBeanDarfKeineTransaktionStarten_     | isyfact:batch:Empfohlen            | _BatchklassenMitPraefixBat_
-  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _GeschaeftsobjektMitBoSuffix_
+  | isyfact:batch:Verbindlich         | _AusfuehrungsBeanDarfKeineTransaktionStarten_     | isyfact:batch:Empfohlen            | _NamenskonventionBatchklassen_
+  | isyfact:core:Verbindlich          | _BeanNichtPerNameAuslesen_                        | isyfact:core:Empfohlen             | _NamenskonventionGeschaeftsobjekt_
   | isyfact:datetime:Verbindlich      | _AufrufVonNowOderCurrentTimeMillis_               |                                    |
   |                                   |                                                   | isyfact:fehlerbehandlung:Empfohlen | _ExceptionsErbenVonPlisException_, _ServiceExceptionErbtVonPlisToException_
   |                                   |                                                   | isyfact:gui:Empfohlen              | _ModelBeanSerializable_, _ModelBeanVerwendetAwkTypen_, _ModelBeanNameEnthaeltKomponente_, _ControllerBeanNameEnthaeltKomponente_, _ControllerBeanErbtVonAbstractGuiController_
   | isyfact:konfiguration:Verbindlich | _BenutzeKeineInternenKlassen_                     | isyfact:konfiguration:Empfohlen    | _SpeichereKeineKonfigurationsParameter_
   | isyfact:layer:Verbindlich         | _ZugriffAufCoreLayerUeberInterface_,
                                         _UndefinedDependencies_,
-                                        _UnusedDependencies_                              |                                    |
   | isyfact:logging:Verbindlich       | _IsyLoggerMussVerwendetWerden_,
                                         _IsyLoggerMussStatischInitialisiertWerden_,
                                         _IsyLoggerMustBeDeclaredAsConstant_               |                                    |
@@ -68,9 +79,9 @@ Folgende Gruppen sind verfügbar:
                                         _WurzelPackageUndMavenKoordinatenStimmenUeberein_ |                                    |
   |                                   |                                                   | isyfact:persistence:Empfohlen      | _EntitiesLiegenInPackageEntity_,
                                                                                                                                  _EntitiesVerwendenKeineCompositeKeys_,
-                                                                                                                                 _DaoInterfacesVonDaoAbgeleitet_,
-                                                                                                                                 _DaoKlasseVonAbstractDaoAbgeleitet_,
-                                                                                                                                 _KeineNamedQueriesUeberAnnotationen_,
+                                                                                                                                 _DaoImplPackage_,
+                                                                                                                                 _DaoVonAbstractDaoAbgeleitet_,
+                                                                                                                                 _DaoImplementiertDaoInterface´_,
                                                                                                                                  _KeineBulkQueries_,
                                                                                                                                  _GenerationTypeAuto_,
                                                                                                                                  _KeinePlisDataSource_
@@ -81,5 +92,17 @@ Folgende Gruppen sind verfügbar:
                                                                                                                                  _MBeanMitZugriffAufAWK_,
                                                                                                                                  _MBeanPackageStruktur_
 |====
+
+Für die Regel `KeinePlisDataSource` müssen die XML-Konfigurationsdateien von Spring gescannt werden.
+Hierzu ist der Pfad zu den XML-Dateien einzutragen.
+
+[source,xml]
+----
+<scanProperties>
+    <xml.file.include>
+        /resources/spring/*
+    </xml.file.include>
+</scanProperties>
+----
 
 

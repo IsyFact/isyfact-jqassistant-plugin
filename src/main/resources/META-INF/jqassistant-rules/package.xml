@@ -25,6 +25,22 @@
         ]]></cypher>
     </concept>
 
+    <concept id="isyfact:package:ApplicationType">
+        <requiresConcept refId="isyfact:package:Root"/>
+
+        <description>
+            Markiert alle Klassen im Wurzel-Package mit ApplicationType
+        </description>
+        <cypher><![CDATA[
+            MATCH
+              (:Root)-[:CONTAINS*]->(t:Type)
+            SET
+              t:ApplicationType
+            RETURN
+              t AS ApplicationType
+        ]]></cypher>
+    </concept>
+
     <constraint id="isyfact:package:AlleJavaKlassenMuessenImWurzelPackageLiegen">
         <requiresConcept refId="isyfact:maven:MainArtifact"/>
         <requiresConcept refId="isyfact:package:Root"/>
@@ -34,32 +50,34 @@
         </description>
         <cypher><![CDATA[
             MATCH
-              (:Main:Artifact)-[:CONTAINS]->(type:Type),
+              (mainArtifact:Main)-[:CONTAINS]->(t:Type),
               (rootPackage:Root)
-            WHERE NOT
-              type.fqn STARTS WITH rootPackage.fqn
+            WHERE
+              NOT t.fqn STARTS WITH rootPackage.fqn
             RETURN
-              type AS InvalidType
+              t AS TypeNichtImRootPackage
         ]]></cypher>
     </constraint>
 
     <constraint id="isyfact:package:WurzelPackageUndMavenKoordinatenStimmenUeberein">
         <requiresConcept refId="isyfact:maven:MainArtifact"/>
         <requiresConcept refId="isyfact:package:Root"/>
+
         <description>
-            Das Wurzel-Package stimmt mit "groupId" und "artifactId" überein.
+            Das Wurzel-Package stimmt mit groupId oder groupId und artifactId überein.
         </description>
         <cypher><![CDATA[
             MATCH
               (mainArtifact:Main),
               (rootPackage:Root)
             WITH
-              (mainArtifact.group + "." + mainArtifact.name) AS mavenKoordinaten,
+              mainArtifact.group AS groupId,
+              (mainArtifact.group + "." + mainArtifact.name) AS groupIdArtifactId,
               rootPackage.fqn AS rootPackage
             WHERE
-              rootPackage <> mavenKoordinaten
+              NOT (rootPackage = groupId OR rootPackage = groupIdArtifactId)
             RETURN
-              rootPackage, mavenKoordinaten
+              rootPackage, groupId, groupIdArtifactId
         ]]></cypher>
     </constraint>
 

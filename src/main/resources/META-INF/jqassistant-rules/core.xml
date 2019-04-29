@@ -5,7 +5,7 @@
     </group>
 
     <group id="isyfact:core:Empfohlen">
-        <includeConstraint refId="isyfact:core:GeschaeftsobjektMitBoSuffix"/>
+        <includeConstraint refId="isyfact:core:NamenskonventionGeschaeftsobjekt"/>
         <includeConstraint refId="isyfact:core:KomponenteZugriffPersistenz"/>
     </group>
 
@@ -17,27 +17,29 @@
             SET
               coreType:Core:CoreType
             RETURN
-              coreType AS CoreType
+              count(coreType)
         ]]></cypher>
     </concept>
 
     <concept id="isyfact:core:Geschaeftsobjekt">
         <requiresConcept refId="isyfact:core:CoreType"/>
-        <description>Unter Geschäftsobjekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im Anwendungskern verwendet werden..</description>
+        <description>
+            Unter Geschäftsobjekten werden nicht-persistente Objekte verstanden, die in Schnittstellen im
+            Anwendungskern verwendet werden. Sie liegen in den Packages "eingabedaten", "ausgabedaten" oder
+            "daten" innerhalb des Packages einer Komponente.
+        </description>
         <cypher><![CDATA[
             MATCH
-              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:RETURNS]->(returnType:Type)<-[:CONTAINS*]-(:Root)
+              (datenPackage:Package)-[:CONTAINS]->(ct:CoreType)
+            WHERE
+              (datenPackage.name = "eingabedaten" OR
+               datenPackage.name = "ausgabedaten" OR
+               datenPackage.name = "daten") AND
+              NOT ct:Enum
             SET
-              returnType:Core:Geschaeftsobjekt
+              ct:Core:Geschaeftsobjekt
             RETURN
-              returnType AS Geschaeftsobjekt
-            UNION
-            MATCH
-              (:Layer {name: "core"})-[:CONTAINS*]->(i:Interface)-[:DECLARES]->(m:Method)-[:HAS]->(:Parameter)-[:OF_TYPE]->(parameterType:Type)<-[:CONTAINS*]-(:Root)
-            SET
-              parameterType:Core:Geschaeftsobjekt
-            RETURN
-              parameterType AS Geschaeftsobjekt
+             count(ct)
         ]]></cypher>
     </concept>
 
@@ -49,7 +51,7 @@
             mit dem DispatcherServlet).</description>
         <cypher><![CDATA[
             MATCH
-              (t:Type)-[:DECLARES]->(m:Method)-[i:INVOKES]->(getBean:Method),
+              (t:ApplicationType)-[:DECLARES]->(m:Method)-[i:INVOKES]->(getBean:Method),
               (applicationContext:Type)-[:DECLARES]->(getBean)
             WHERE
               applicationContext.fqn = "org.springframework.context.ApplicationContext"
@@ -59,16 +61,19 @@
         ]]></cypher>
     </constraint>
 
-    <constraint id="isyfact:core:GeschaeftsobjektMitBoSuffix">
+    <constraint id="isyfact:core:NamenskonventionGeschaeftsobjekt">
         <requiresConcept refId="isyfact:core:Geschaeftsobjekt"/>
-        <description>Namensschema für Geschäftsobjekte: "(Entitaetsname)Bo"</description>
+
+        <requiresParameter name="patternNameGeschaeftsobjekt" type="String"/>
+
+        <description>Der Name von Geschäftsobjekten hält sich an die konfigurierte Konvention</description>
         <cypher><![CDATA[
             MATCH
-              (bo:Geschaeftsobjekt)
+              (go:Geschaeftsobjekt)
             WHERE
-              NOT bo.name ENDS WITH "Bo"
+              NOT go.name =~ {patternNameGeschaeftsobjekt}
             RETURN
-              bo AS GeschaeftsobjektOhneBoSuffix
+              go AS AbweichenderNameGeschaeftsobjekt
         ]]></cypher>
     </constraint>
 
