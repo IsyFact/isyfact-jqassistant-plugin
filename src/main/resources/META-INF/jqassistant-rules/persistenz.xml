@@ -5,7 +5,7 @@
         <includeConstraint refId="isyfact:persistence:EntitiesVerwendenKeineCompositeKeys"/>
         <includeConstraint refId="isyfact:persistence:DaoImplPackage"/>
         <includeConstraint refId="isyfact:persistence:DaoVonAbstractDaoAbgeleitet"/>
-        <includeConstraint refÍd="isyfact:persistence:DaoImplementiertDaoInterface"/>
+        <includeConstraint refId="isyfact:persistence:DaoImplementiertDaoInterface"/>
         <includeConstraint refId="isyfact:persistence:KeineBulkQueries"/>
         <includeConstraint refId="isyfact:persistence:GenerationTypeAuto"/>
         <includeConstraint refId="isyfact:persistence:KeinePlisDataSource"/>
