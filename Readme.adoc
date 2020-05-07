@@ -45,7 +45,7 @@ Um den Regelsatz zu verwenden wird in der Anwendung ein zusätzliches Maven-Plug
         <dependency>
             <groupId>de.bund.bva.isyfact</groupId>
             <artifactId>isyfact-jqassistant-plugin</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.1</version>
         </dependency>
     </dependencies>
 </plugin>
