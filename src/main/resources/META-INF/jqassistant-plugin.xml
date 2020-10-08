@@ -1,5 +1,6 @@
-<jqa-plugin:jqassistant-plugin xmlns:jqa-plugin="http://www.buschmais.com/jqassistant/core/plugin/schema/v1.1"
-                               name="IsyFact">
+<jqassistant-plugin xmlns="http://schema.jqassistant.org/plugin/v1.8"
+                    name="IsyFact" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://schema.jqassistant.org/plugin/v1.8 http://schema.jqassistant.org/plugin/jqassistant-plugin-v1.8.xsd">
     <description>Stellt Regeln zur Verwendung der IsyFact bereit.</description>
     <rules>
         <resource>batch.xml</resource>
@@ -18,4 +19,4 @@
         <resource>ueberwachung.xml</resource>
         <resource>isyfact-groups.xml</resource>
     </rules>
-</jqa-plugin:jqassistant-plugin>
+</jqassistant-plugin>
