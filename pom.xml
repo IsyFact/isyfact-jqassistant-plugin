@@ -4,7 +4,7 @@
 
     <groupId>de.bund.bva.isyfact</groupId>
     <artifactId>isyfact-jqassistant-plugin</artifactId>
-    <version>1.9.0</version>
+    <version>1.10.0-SNAPSHOT</version>
 
     <build>
         <plugins>
