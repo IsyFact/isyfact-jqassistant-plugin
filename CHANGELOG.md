@@ -1,3 +1,5 @@
+# 1.10.0
+
 # 1.9.0
 - `IFS-1269`: XML Schema Referenzen auflösbar machen
 
